@@ -11,19 +11,30 @@ from tqdm.auto import tqdm, trange
 
 class PrincipalParTree(ParTree):
     def __init__(
-        self,
-        max_depth=3,
-        max_nbr_clusters=10,
-        min_samples_leaf=3,
-        min_samples_split=5,
-        max_nbr_values=np.inf,
-        max_nbr_values_cat=np.inf,
-        random_state=None,
-        bic_eps=0.0,
-        n_components=1,
-        oblique_splits=False,
-        max_oblique_features=2,
+            self,
+            max_depth=3,
+            max_nbr_clusters=10,
+            min_samples_leaf=3,
+            min_samples_split=5,
+            max_nbr_values=np.inf,
+            max_nbr_values_cat=np.inf,
+            random_state=None,
+            bic_eps=0.0,
+            n_components=1,
+            oblique_splits=False,
+            max_oblique_features=2,
     ):
+        """
+        :param n_components:
+            Number of components (must be less than the number of features in the dataset).
+
+        :param oblique_splits:
+
+
+        :param max_oblique_features:
+
+
+        """
         super().__init__(
             max_depth,
             max_nbr_clusters,

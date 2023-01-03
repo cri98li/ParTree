@@ -1,9 +1,5 @@
-from typing import Any
-
 import numpy as np
 from itertools import repeat
-
-from tqdm.auto import tqdm, trange
 
 from scipy import stats
 from scipy.spatial.distance import cdist
@@ -28,6 +24,13 @@ class CenterParTree(ParTree):
             metric="euclidean",
             n_jobs=1
     ):
+        """
+        For continuous features the algorithm uses "metric" distance, for categorical ones the Mode, and for mixed types
+        it uses Seuclidean distance and Jaccard distance.
+
+        :param metric:
+            The distance metric to use. For more information see the cdist metric argument in the scipy documentation
+        """
         super().__init__(
             max_depth,
             max_nbr_clusters,
@@ -45,17 +48,18 @@ class CenterParTree(ParTree):
         n_features = self.X.shape[1]
 
         best_feature = None
+        best_threshold = None
         best_mse = np.inf
 
         for res in self.processPoolExecutor.map(_make_split_innerloop,
-                                                             repeat(self.X),
-                                                             repeat(self.con_indexes),
-                                                             repeat(self.cat_indexes),
-                                                             repeat(self.metric),
-                                                             repeat(self.is_categorical_feature),
-                                                             repeat(idx_iter),
-                                                             range(n_features),
-                                                             repeat(self.feature_values)):
+                                                repeat(self.X),
+                                                repeat(self.con_indexes),
+                                                repeat(self.cat_indexes),
+                                                repeat(self.metric),
+                                                repeat(self.is_categorical_feature),
+                                                repeat(idx_iter),
+                                                range(n_features),
+                                                repeat(self.feature_values)):
 
             best_returned_mse, best_returned_feature, best_returned_threshold = res
 
@@ -67,68 +71,52 @@ class CenterParTree(ParTree):
         if best_feature is None:
             return None, np.zeros(len(self.X[idx_iter])), np.inf, False
 
-        clf = DecisionSplit(
-            best_feature, best_threshold, self.is_categorical_feature[best_feature]
-        )
+        clf = DecisionSplit(best_feature, best_threshold, self.is_categorical_feature[best_feature])
+
         labels = clf.apply(self.X[idx_iter])
         bic_children = bic(self.X[idx_iter], (np.array(labels) - 1).tolist())
-        is_oblique = False
 
-        return clf, labels, bic_children, is_oblique
+        return clf, labels, bic_children, False
+
 
 def _mixed_metric(con_indexes, cat_indexes, u, v):
-    con_indexes = con_indexes
-    cat_indexes = cat_indexes
-    con_dist = seuclidean(
-        u[con_indexes], v[con_indexes], V=np.ones(len(con_indexes))
-    )
+    con_dist = seuclidean(u[con_indexes], v[con_indexes], V=np.ones(len(con_indexes)))
     cat_dist = jaccard(u[cat_indexes], v[cat_indexes])
     con_w = len(con_indexes) / len(u)
     cat_w = len(cat_indexes) / len(u)
     dist = con_w * con_dist + cat_w * cat_dist
     return dist
-def _make_split_innerloop(X, con_indexes, cat_indexes, metric, is_categorical_feature, idx_iter, feature, feature_values):
+
+
+def _make_split_innerloop(X, con_indexes, cat_indexes, metric, is_categorical_feature, idx_iter, feature,
+                          feature_values):
     best_feature = None
     best_mse = np.inf
+    best_threshold = None
+
     n_features = X.shape[1]
     for threshold in feature_values[feature]:
 
-        if not is_categorical_feature[
-            feature
-        ]:  # splitting feature is continuous
-            cond = X[idx_iter, feature] <= threshold
-            X_a = X[idx_iter][cond]
-            X_b = X[idx_iter][~cond]
-        else:  # splitting feature is categorical
-            cond = X[idx_iter, feature] == threshold
-            X_a = X[idx_iter][cond]
-            X_b = X[idx_iter][~cond]
+        cond = X[idx_iter, feature] == threshold if is_categorical_feature[feature] \
+            else X[idx_iter, feature] <= threshold
+
+        X_a = X[idx_iter][cond]
+        X_b = X[idx_iter][~cond]
 
         if len(X_a) == 0 or len(X_b) == 0:
             continue
 
-        if np.any(is_categorical_feature) and not np.all(
-                is_categorical_feature
-        ):  # mixed
-            # print('---> Mixed')
-            centroid_a = np.mean(
-                X_a[:, ~np.array(is_categorical_feature)], axis=0
-            )
-            centroid_b = np.mean(
-                X_b[:, ~np.array(is_categorical_feature)], axis=0
-            )
+        if np.any(is_categorical_feature) and not np.all(is_categorical_feature):  # mixed
+            centroid_a = np.mean(X_a[:, ~is_categorical_feature], axis=0)
+            centroid_b = np.mean(X_b[:, ~is_categorical_feature], axis=0)
 
-            modoid_a = stats.mode(
-                X_a[:, is_categorical_feature], axis=0, keepdims=False
-            ).mode[0]
-            modoid_b = stats.mode(
-                X_b[:, is_categorical_feature], axis=0, keepdims=False
-            ).mode[0]
+            modoid_a = stats.mode(X_a[:, is_categorical_feature], axis=0, keepdims=False).mode[0]
+            modoid_b = stats.mode(X_b[:, is_categorical_feature], axis=0, keepdims=False).mode[0]
 
             cm_a = np.zeros(n_features)
             cm_b = np.zeros(n_features)
-            cm_a[~np.array(is_categorical_feature)] = centroid_a
-            cm_b[~np.array(is_categorical_feature)] = centroid_b
+            cm_a[~is_categorical_feature] = centroid_a
+            cm_b[~is_categorical_feature] = centroid_b
             cm_a[is_categorical_feature] = modoid_a
             cm_b[is_categorical_feature] = modoid_b
 
@@ -136,7 +124,6 @@ def _make_split_innerloop(X, con_indexes, cat_indexes, metric, is_categorical_fe
             dist_b = cdist(X_b, cm_b.reshape(1, -1), metric=lambda u, v: _mixed_metric(con_indexes, cat_indexes, u, v))
 
         elif np.all(is_categorical_feature):  # all categorical
-            # print('---> All cat')
             modoid_a = stats.mode(X_a, axis=0).mode[0]
             modoid_b = stats.mode(X_b, axis=0).mode[0]
 
@@ -144,7 +131,6 @@ def _make_split_innerloop(X, con_indexes, cat_indexes, metric, is_categorical_fe
             dist_b = cdist(X_b, modoid_b.reshape(1, -1), metric=metric)
 
         else:  # all continuous
-            # print('---> All cont')
             centroid_a = np.mean(X_a, axis=0)
             centroid_b = np.mean(X_b, axis=0)
 
@@ -153,10 +139,7 @@ def _make_split_innerloop(X, con_indexes, cat_indexes, metric, is_categorical_fe
 
         mse_a = np.mean(dist_a)
         mse_b = np.mean(dist_b)
-        mse_tot = (
-                len(X_a) / len(X[idx_iter]) * mse_a
-                + len(X_b) / len(X[idx_iter]) * mse_b
-        )
+        mse_tot = (len(X_a) / len(X[idx_iter]) * mse_a + len(X_b) / len(X[idx_iter]) * mse_b)
 
         if mse_tot < best_mse:
             best_feature = feature

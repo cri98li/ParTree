@@ -1,6 +1,7 @@
 import heapq
 import random
 from concurrent.futures import ProcessPoolExecutor
+from typing import Union
 
 import numpy as np
 
@@ -12,19 +13,71 @@ from ParTree.algorithms.data_splitter import DecisionSplit
 from ParTree.classes.ParTree_node import ParTree_node
 
 
+def _prepare_data(X, max_nbr_values, max_nbr_values_cat):
+    feature_values = dict()
+    n_features = X.shape[1]
+    is_categorical_feature = np.full_like(np.zeros(n_features, dtype=bool), False)
+    for feature in range(n_features):
+        values = np.unique(X[:, feature])
+        if len(values) > max_nbr_values:
+            _, vals = np.histogram(values, bins=max_nbr_values)
+            values = [(vals[i] + vals[i + 1]) / 2 for i in range(len(vals) - 1)]
+        feature_values[feature] = values
+
+        if len(values) <= max_nbr_values_cat:
+            is_categorical_feature[feature] = True
+
+    return feature_values, is_categorical_feature
+
+
 class ParTree(ABC):
+
     def __init__(
-        self,
-        max_depth=3,
-        max_nbr_clusters=10,
-        min_samples_leaf=3,
-        min_samples_split=5,
-        max_nbr_values=np.inf,
-        max_nbr_values_cat=np.inf,
-        bic_eps=0.0,
-        random_state=None,
-        n_jobs=1
+            self,
+            max_depth: int = 3,
+            max_nbr_clusters: int = 10,
+            min_samples_leaf: int = 3,
+            min_samples_split: int = 5,
+            max_nbr_values: Union[int, float] = np.inf,
+            max_nbr_values_cat: Union[int, float] = np.inf,
+            bic_eps: float = 0.0,
+            random_state: int = None,
+            n_jobs: int = 1
     ):
+        """
+        :param max_depth:
+            Maximum depth of the tree describing the splits made by the algorithm. Consequently, with this parameter
+            it is possible to limit the number of attribute tests in the antecedent.
+
+        :param max_nbr_clusters:
+            The maximum number of clusters to form as well as the number of centroids to generate.
+            TODO: controllare se è davvero il massimo
+
+        :param min_samples_leaf:
+            The minimum number of samples required to be at a leaf node. A split point at any depth will only be
+            considered if it leaves at least min_samples_leaf training samples in each of the left and right branches.
+
+        :param min_samples_split:
+            The minimum number of samples required to split an internal node.
+
+        :param max_nbr_values:
+            Adjusts the maximum number of possible splits to be considered for continuous features. Given a feature,
+            if there are more unique values than this hyperparameter, the values are binned
+
+
+        :param max_nbr_values_cat:
+            If the unique values of a feature do not exceed the value of this hyperparameter, it is treated by
+            the algorithm as categorical
+
+        :param bic_eps:
+            Percentage of BIC parent discount.
+
+        :param random_state:
+            Parameter provided to the random.seed() function to make randomness deterministic.
+
+        :param n_jobs:
+            The number of jobs to run in parallel.
+        """
         self.max_depth = max_depth
         self.max_nbr_clusters = max_nbr_clusters
         self.min_samples_leaf = min_samples_leaf
@@ -37,13 +90,18 @@ class ParTree(ABC):
 
         random.seed(self.random_state)
 
+        self.is_categorical_feature = None
         self.X = None
         self.labels_ = None
         self.clf_dict_ = None
         self.bic_ = None
         self.label_encoder_ = None
+        self.cat_indexes = None
+        self.feature_values = None
+        self.con_indexes = None
+        self.queue = list()
 
-    def _build_leaf(self, node: ParTree_node):
+    def _make_leaf(self, node: ParTree_node):
         nbr_samples = len(node.idx)
         leaf_labels = np.array([node.label] * nbr_samples).astype(int)
         node_bic = bic(self.X[node.idx], [0] * nbr_samples)
@@ -59,12 +117,11 @@ class ParTree(ABC):
 
     def fit(self, X):
         self.X = X
-        idx = np.arange(self.X.shape[0])
+        n_features = X.shape[1]
+        n_idx = X.shape[0]
+        idx = np.arange(n_idx)
 
-        self.labels_ = -1 * np.ones(self.X.shape[0]).astype(int)
-
-        self.queue = list()
-        iter_count = 0
+        self.labels_ = -1 * np.ones(n_idx).astype(int)
 
         cluster_id = 0
         root_node = ParTree_node(idx, cluster_id)
@@ -73,56 +130,35 @@ class ParTree(ABC):
 
         nbr_curr_clusters = 0
 
-        self.feature_values = dict()
-        n_features = self.X.shape[1]
-        self.is_categorical_feature = [False] * n_features
-        for feature in range(n_features):
-            values = np.unique(self.X[:, feature])
-            if len(values) > self.max_nbr_values:
-                _, vals = np.histogram(values, bins=self.max_nbr_values)
-                values = [(vals[i] + vals[i + 1]) / 2 for i in range(len(vals) - 1)]
-            self.feature_values[feature] = values
+        self.feature_values, self.is_categorical_feature = _prepare_data(X, self.max_nbr_values,
+                                                                         self.max_nbr_values_cat)
 
-            if len(values) <= self.max_nbr_values_cat:
-                self.is_categorical_feature[feature] = True
+        self.con_indexes = np.array([i for i in range(n_features) if not self.is_categorical_feature[i]])
+        self.cat_indexes = np.array([i for i in range(n_features) if self.is_categorical_feature[i]])
 
-        self.con_indexes = np.array(
-            [i for i in range(n_features) if not self.is_categorical_feature[i]]
-        )
-        self.cat_indexes = np.array(
-            [i for i in range(n_features) if self.is_categorical_feature[i]]
-        )
+        while len(self.queue) > 0 and nbr_curr_clusters + len(self.queue) <= self.max_nbr_clusters:
+            _, (idx_iter, node_depth, node) = heapq.heappop(self.queue)
 
-        while (
-            len(self.queue) > 0
-            and nbr_curr_clusters + len(self.queue) <= self.max_nbr_clusters
-        ):
-
-            iter_count += 1
-            _, vals = heapq.heappop(self.queue)
-            idx, node_depth, node = vals
-
-            idx_iter = idx
             nbr_samples = len(idx_iter)
 
-            if nbr_curr_clusters + len(self.queue) + 1 >= self.max_nbr_clusters\
-                    or nbr_samples < self.min_samples_split\
+            if nbr_curr_clusters + len(self.queue) + 1 >= self.max_nbr_clusters \
+                    or nbr_samples < self.min_samples_split \
                     or node_depth >= self.max_depth:
-                self._build_leaf(node)
+                self._make_leaf(node)
                 nbr_curr_clusters += 1
                 continue
 
             clf, labels, bic_children, is_oblique = self._make_split(idx_iter)
 
             if len(np.unique(labels)) == 1:
-                self._build_leaf(node)
+                self._make_leaf(node)
                 nbr_curr_clusters += 1
                 continue
 
             bic_parent = bic(self.X[idx_iter], [0] * nbr_samples)
 
             if bic_parent < bic_children - self.bic_eps * np.abs(bic_parent):
-                self._build_leaf(node)
+                self._make_leaf(node)
                 nbr_curr_clusters += 1
                 continue
 
@@ -132,12 +168,12 @@ class ParTree(ABC):
             idx_all_r = idx_iter[idx_r]
 
             cluster_id += 1
-            node_l = ParTree_node(idx_all_l, cluster_id)
-            bic_l = bic(self.X[idx_iter[idx_l]], [0] * len(idx_l))
+            node_l = ParTree_node(idx=idx_all_l, label=cluster_id)
+            bic_l = bic(X[idx_iter[idx_l]], [0] * len(idx_l))
 
             cluster_id += 1
-            node_r = ParTree_node(idx_all_r, cluster_id)
-            bic_r = bic(self.X[idx_iter[idx_r]], [0] * len(idx_r))
+            node_r = ParTree_node(idx=idx_all_r, label=cluster_id)
+            bic_r = bic(X[idx_iter[idx_r]], [0] * len(idx_r))
 
             node.clf = clf
             node.node_l = node_l
@@ -145,21 +181,9 @@ class ParTree(ABC):
             node.bic = bic_parent
             node.is_oblique = is_oblique
 
-            heapq.heappush(
-                self.queue,
-                (
-                    -len(idx_all_l) + 0.00001 * bic_l,
-                    (idx_all_l, node_depth + 1, node_l),
-                ),
-            )
-
-            heapq.heappush(
-                self.queue,
-                (
-                    -len(idx_all_r) + 0.00001 * bic_r,
-                    (idx_all_r, node_depth + 1, node_r),
-                ),
-            )
+            # TODO: chiarire q-score
+            heapq.heappush(self.queue, (-len(idx_all_l) + 0.00001 * bic_l, (idx_all_l, node_depth + 1, node_l)))
+            heapq.heappush(self.queue, (-len(idx_all_r) + 0.00001 * bic_r, (idx_all_r, node_depth + 1, node_r)))
 
         self.clf_dict_ = root_node
         self.label_encoder_ = LabelEncoder()
@@ -202,14 +226,14 @@ class ParTree(ABC):
 
         return axes2d
 
-    def _get_axes2d(self, idx, clf_dict, axes2d, eps):
+    def _get_axes2d(self, idx, clf_dict: ParTree_node, axes2d, eps):
         idx_iter = idx
 
-        if clf_dict["clf"] is None:
+        if clf_dict.clf is None:
             return
 
         else:
-            clf = clf_dict["clf"]
+            clf = clf_dict.clf
             labels = clf.apply(self.X[idx_iter])
 
             idx_l, idx_r = np.where(labels == 1)[0], np.where(labels == 2)[0]
@@ -228,7 +252,7 @@ class ParTree(ABC):
                 else:
                     axes = [[x_min - eps, x_max + eps], [thr, thr]]
             else:
-                if not clf_dict["is_oblique"]:
+                if not clf_dict.is_oblique:
                     feat = clf.tree_.feature[0]
                     thr = clf.tree_.threshold[0]
 
@@ -242,8 +266,8 @@ class ParTree(ABC):
                         f = clf.oblq_clf.tree_.feature[0]
                         b = clf.oblq_clf.tree_.threshold[0]
                         m = (
-                            clf.householder_matrix[:, f][0]
-                            / clf.householder_matrix[:, f][1]
+                                clf.householder_matrix[:, f][0]
+                                / clf.householder_matrix[:, f][1]
                         )
                         y = b - m * x - 1 + f
                         return y
@@ -255,27 +279,25 @@ class ParTree(ABC):
 
             axes2d.append(axes)
 
-            self._get_axes2d(idx_all_l, clf_dict["node_l"], axes2d, eps)
-            self._get_axes2d(idx_all_r, clf_dict["node_r"], axes2d, eps)
+            self._get_axes2d(idx_all_l, clf_dict.node_l, axes2d, eps)
+            self._get_axes2d(idx_all_r, clf_dict.node_r, axes2d, eps)
 
     def get_rules(self):
         idx = np.arange(self.X.shape[0])
+        return self._get_rules(idx, self.clf_dict_, 0)
+
+    def _get_rules(self, idx_iter, clf_dict: ParTree_node, cur_depth):
         rules = list()
-        self._get_rules(idx, self.clf_dict_, rules, 0)
-        return rules
 
-    def _get_rules(self, idx, clf_dict, rules, cur_depth):
-        idx_iter = idx
-
-        if clf_dict["is_leaf"]:
-            label = self.label_encoder_.transform([clf_dict["label"]])[0]
-            leaf = (False, label, clf_dict["samples"], clf_dict["support"], cur_depth)
+        if clf_dict.is_leaf:
+            label = self.label_encoder_.transform([clf_dict.label])[0]
+            leaf = (False, label, clf_dict.samples, clf_dict.support, cur_depth)
 
             rules.append(leaf)
-            return
+            return rules
 
         else:
-            clf = clf_dict["clf"]
+            clf = clf_dict.clf
             labels = clf.apply(self.X[idx_iter])
 
             idx_l, idx_r = np.where(labels == 1)[0], np.where(labels == 2)[0]
@@ -288,7 +310,7 @@ class ParTree(ABC):
                 cat = clf.categorical
                 rule = (True, [feat], [1.0], thr, cat, cur_depth)
             else:
-                if not clf_dict["is_oblique"]:
+                if not clf_dict.is_oblique:
                     feat = clf.tree_.feature[0]
                     thr = clf.tree_.threshold[0]
                     rule = (True, [feat], [1.0], thr, False, cur_depth)
@@ -301,9 +323,9 @@ class ParTree(ABC):
                     rule = (True, feat_list, coef, thr, False, cur_depth)
 
             rules.append(rule)
-            self._get_rules(idx_all_l, clf_dict["node_l"], rules, cur_depth + 1)
-            self._get_rules(idx_all_r, clf_dict["node_r"], rules, cur_depth + 1)
-            return
+            rules += self._get_rules(idx_all_l, clf_dict.node_l, cur_depth + 1)
+            rules += self._get_rules(idx_all_r, clf_dict.node_r, cur_depth + 1)
+            return rules
 
 
 def print_rules(rules, nbr_features, feature_names=None, precision=2, cat_precision=0):

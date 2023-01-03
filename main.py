@@ -8,16 +8,21 @@ from sklearn.metrics import rand_score, adjusted_rand_score, mutual_info_score, 
     silhouette_score, calinski_harabasz_score, davies_bouldin_score
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 
-from ParTree.classes.CenterParTree import CenterParTree
-from ParTree.classes.ImpurityParTree import ImpurityParTree
+from ParTree.classes.ParTree import print_rules
+
+import ParTree.classes.ParTree
+from ParTree.classes.CenterParTree2 import CenterParTree
+#from ParTree.classes.CenterParTree import CenterParTree
+from ParTree.classes.ImpurityParTree2 import ImpurityParTree
+#from ParTree.classes.ImpurityParTree import ImpurityParTree
 from ParTree.classes.PrincipalParTree import PrincipalParTree
 
 if __name__ == '__main__':
     data = pd.read_csv('ParTree/test/datasets/real/titanic.csv', header=0)
 
     #cptree = CenterParTree(n_jobs=12)
-    #cptree = ImpurityParTree(n_jobs=1)
-    cptree = PrincipalParTree(n_components=150)
+    cptree = ImpurityParTree(n_jobs=12)
+    #cptree = PrincipalParTree(n_components=150)
 
     data = data.drop(['PassengerId', 'Name', 'Ticket', 'Fare'], axis=1)
 
@@ -100,3 +105,4 @@ if __name__ == '__main__':
 
     print(end - start)
     print(silhouette)
+    print(print_rules(cptree.get_rules(), X.shape[1]))

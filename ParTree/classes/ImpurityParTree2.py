@@ -65,6 +65,8 @@ def classification_error(labels):
 
 
 def r2_relu(y_true, y_pred):
+    if len(y_true) < 2:
+        return .0
     return max(0.0, r2_score(y_true, y_pred))
 
 
@@ -131,17 +133,22 @@ class ImpurityParTree(ParTree):
         best_threshold = None
         best_impurity = np.inf
 
-        for res in self.processPoolExecutor.map(_make_split_innerloop,
-                                                repeat(self.X),
-                                                repeat(self.criteria_clf),
-                                                repeat(self.criteria_reg),
-                                                repeat(self.agg_fun),
-                                                repeat(self.is_categorical_feature),
-                                                repeat(idx_iter),
-                                                range(n_features),
-                                                repeat(self.feature_values)):
+        results = []
 
-            best_returned_impurity, best_returned_feature, best_returned_threshold = res
+        for n in range(n_features):
+            for feature in self.feature_values[n]:
+                results.append(self.processPoolExecutor.submit(_make_split_innerloop,
+                                                               self.X,
+                                                               self.criteria_clf,
+                                                               self.criteria_reg,
+                                                               self.agg_fun,
+                                                               self.is_categorical_feature,
+                                                               idx_iter,
+                                                               n,
+                                                               feature))
+
+        for res in results:
+            best_returned_impurity, best_returned_feature, best_returned_threshold = res.result()
 
             if best_returned_impurity < best_impurity:
                 best_feature = best_returned_feature
@@ -160,53 +167,43 @@ class ImpurityParTree(ParTree):
 
 
 def _make_split_innerloop(X, criteria_clf, criteria_reg, agg_fun, is_categorical_feature, idx_iter, feature,
-                          feature_values):
-    best_feature = None
-    best_threshold = None
-    best_impurity = np.inf
+                          threshold):
 
     n_features = X.shape[1]
 
-    for threshold in feature_values[feature]:
+    if not is_categorical_feature[feature]:  # splitting feature is continuous
+        cond = X[idx_iter, feature] <= threshold
+        X_a = X[idx_iter][cond]
+        X_b = X[idx_iter][~cond]
+    else:  # splitting feature is categorical
+        cond = X[idx_iter, feature] == threshold
+        X_a = X[idx_iter][cond]
+        X_b = X[idx_iter][~cond]
 
-        if not is_categorical_feature[feature]:  # splitting feature is continuous
-            cond = X[idx_iter, feature] <= threshold
-            X_a = X[idx_iter][cond]
-            X_b = X[idx_iter][~cond]
-        else:  # splitting feature is categorical
-            cond = X[idx_iter, feature] == threshold
-            X_a = X[idx_iter][cond]
-            X_b = X[idx_iter][~cond]
+    if len(X_a) == 0 or len(X_b) == 0:
+        return [np.inf, None, None]
 
-        if len(X_a) == 0 or len(X_b) == 0:
+    impurity_list = list()
+
+    for target_feature in range(n_features):
+        if target_feature == feature:
             continue
 
-        impurity_list = list()
+        if is_categorical_feature[target_feature]:
+            criteria = CRITERIA_CLF[criteria_clf]
+            imp_a = criteria(X_a[:, target_feature])
+            imp_b = criteria(X_b[:, target_feature])
 
-        for target_feature in range(n_features):
-            if target_feature == feature:
-                continue
+        else:
+            criteria = CRITERIA_REG[criteria_reg]
+            mean_val_a = np.array([np.mean(X_a[:, target_feature])] * len(X_a))
+            mean_val_b = np.array([np.mean(X_b[:, target_feature])] * len(X_b))
+            imp_a = criteria(X_a[:, target_feature], mean_val_a)
+            imp_b = criteria(X_b[:, target_feature], mean_val_b)
 
-            if is_categorical_feature[target_feature]:
-                criteria = CRITERIA_CLF[criteria_clf]
-                imp_a = criteria(X_a[:, target_feature])
-                imp_b = criteria(X_b[:, target_feature])
+        impurity = len(X_a) / len(X[idx_iter]) * imp_a + len(X_b) / len(X[idx_iter]) * imp_b
+        impurity_list.append(impurity)
 
-            else:
-                criteria = CRITERIA_REG[criteria_reg]
-                mean_val_a = np.array([np.mean(X_a[:, target_feature])] * len(X_a))
-                mean_val_b = np.array([np.mean(X_b[:, target_feature])] * len(X_b))
-                imp_a = criteria(X_a[:, target_feature], mean_val_a)
-                imp_b = criteria(X_b[:, target_feature], mean_val_b)
+    impurity_agg = agg_fun(impurity_list)
 
-            impurity = len(X_a) / len(X[idx_iter]) * imp_a + len(X_b) / len(X[idx_iter]) * imp_b
-            impurity_list.append(impurity)
-
-        impurity_agg = agg_fun(impurity_list)
-
-        if impurity_agg < best_impurity:
-            best_feature = feature
-            best_threshold = threshold
-            best_impurity = impurity_agg
-
-    return [best_impurity, best_feature, best_threshold]
+    return [impurity_agg, feature, threshold]
