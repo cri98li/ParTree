@@ -12,53 +12,32 @@ Classes
 ``Porofile``
 ------------
 
-.. currentmodule:: package_name
-.. autoclass:: Profile
+.. currentmodule:: ParTree
+.. autoclass:: ParTree
     :members:
     :inherited-members:
-
--------------
-``Porofiles``
--------------
-
-.. currentmodule:: package_name
-.. autoclass:: Profiles
-    :members:
-    :inherited-members:
-
-Data transformation
-
-.. autosummary::
-
-    Profiles.add_profile
 
 
 ^^^^^^^^^^
 Algorithms
 ^^^^^^^^^^
 
-.. automodule:: package_name.algorithms
-
-``Porofiles`` container sorting methods
-
+.. automodule:: ParTree
 
 .. autosummary::
     :toctree: algs/
 
-    sort_profiles_by_age
-    sort_profiles_by_name
+    estimate_gaussian_covariances
+    estimate_parameters
+    compute_precision_cholesky
+    estimate_weighted_log_prob
+    estimate_log_prob
+    compute_log_det_cholesky
+    estimate_log_weights
+    score_samples
+    score
+    get_n_parameters
+    bic
 
-^^^
-I/O
-^^^
-
-.. automodule:: package_name.readwrite
-
-JSON I/O
-
-.. autosummary::
-    :toctree: io/
-
-    to_json
-    from_json
-
+    ObliqueHouseHolderSplit
+    DecisionSplit

@@ -45,6 +45,8 @@ class ParTree(ABC):
             n_jobs: int = 1
     ):
         """
+        Initialize the ParTree object.
+
         :param max_depth:
             Maximum depth of the tree describing the splits made by the algorithm. Consequently, with this parameter
             it is possible to limit the number of attribute tests in the antecedent.
@@ -221,16 +223,16 @@ class ParTree(ABC):
 
     def get_axes2d(self, eps=1):
         idx = np.arange(self.X.shape[0])
-        axes2d = list()
-        self._get_axes2d(idx, self.clf_dict_, axes2d, eps)
 
-        return axes2d
+        return self._get_axes2d(idx, self.clf_dict_, eps)
 
-    def _get_axes2d(self, idx, clf_dict: ParTree_node, axes2d, eps):
+    def _get_axes2d(self, idx, clf_dict: ParTree_node, eps):
         idx_iter = idx
 
+        axes2d = list()
+
         if clf_dict.clf is None:
-            return
+            return []
 
         else:
             clf = clf_dict.clf
@@ -279,8 +281,10 @@ class ParTree(ABC):
 
             axes2d.append(axes)
 
-            self._get_axes2d(idx_all_l, clf_dict.node_l, axes2d, eps)
-            self._get_axes2d(idx_all_r, clf_dict.node_r, axes2d, eps)
+            axes2d += self._get_axes2d(idx_all_l, clf_dict.node_l, eps)
+            axes2d += self._get_axes2d(idx_all_r, clf_dict.node_r, eps)
+
+            return axes2d
 
     def get_rules(self):
         idx = np.arange(self.X.shape[0])

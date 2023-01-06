@@ -65,6 +65,8 @@ def classification_error(labels):
 
 
 def r2_relu(y_true, y_pred):
+    if len(y_true) < 2:
+        return .0
     return max(0.0, r2_score(y_true, y_pred))
 
 

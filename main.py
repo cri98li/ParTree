@@ -13,15 +13,15 @@ from ParTree.classes.ParTree import print_rules
 import ParTree.classes.ParTree
 from ParTree.classes.CenterParTree2 import CenterParTree
 #from ParTree.classes.CenterParTree import CenterParTree
-from ParTree.classes.ImpurityParTree2 import ImpurityParTree
-#from ParTree.classes.ImpurityParTree import ImpurityParTree
+#from ParTree.classes.ImpurityParTree2 import ImpurityParTree
+from ParTree.classes.ImpurityParTree import ImpurityParTree
 from ParTree.classes.PrincipalParTree import PrincipalParTree
 
 if __name__ == '__main__':
     data = pd.read_csv('ParTree/test/datasets/real/titanic.csv', header=0)
 
     #cptree = CenterParTree(n_jobs=12)
-    cptree = ImpurityParTree(n_jobs=12)
+    cptree = ImpurityParTree(n_jobs=24)
     #cptree = PrincipalParTree(n_components=150)
 
     data = data.drop(['PassengerId', 'Name', 'Ticket', 'Fare'], axis=1)

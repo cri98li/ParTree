@@ -32,7 +32,7 @@ MOCK_MODULES = [
     "argparse",
     "matplotlib",
     "numpy",
-    "scipy",
+    "scipy"
 ]
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
@@ -41,7 +41,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 html_theme_options = {
     "collapse_navigation": False,
-    "display_version": False,
+    "display_version": True,
 }
 # 'navigation_depth': 3,
 
@@ -80,9 +80,9 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"Package Name"
-copyright = u"2018, Package Author"
-author = u"Package Author"
+project = u"ParTree"
+copyright = u"2023, Package Author"
+author = u"Cristiano Landi"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -258,7 +258,7 @@ latex_documents = [
         master_doc,
         "PackageName.tex",
         u"PackageName Documentation",
-        u"Giulio Rossetti",
+        u"Cristiano Landi",
         "manual",
     ),
 ]
