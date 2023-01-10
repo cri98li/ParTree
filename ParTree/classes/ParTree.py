@@ -12,6 +12,13 @@ from ParTree.algorithms.bic_estimator import bic
 from ParTree.algorithms.data_splitter import DecisionSplit
 from ParTree.classes.ParTree_node import ParTree_node
 
+global global_X
+
+
+def init_pool(X):
+    global global_X
+    global_X = X
+
 
 def _prepare_data(X, max_nbr_values, max_nbr_values_cat):
     feature_values = dict()
@@ -88,7 +95,8 @@ class ParTree(ABC):
         self.max_nbr_values_cat = max_nbr_values_cat
         self.bic_eps = bic_eps
         self.random_state = random_state
-        self.processPoolExecutor = ProcessPoolExecutor(n_jobs)
+        self.n_jobs = n_jobs
+        self.processPoolExecutor = None
 
         random.seed(self.random_state)
 
@@ -118,6 +126,9 @@ class ParTree(ABC):
         pass
 
     def fit(self, X):
+
+        self.processPoolExecutor = ProcessPoolExecutor(self.n_jobs, initializer=init_pool, initargs=(X,))
+
         self.X = X
         n_features = X.shape[1]
         n_idx = X.shape[0]
