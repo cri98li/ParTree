@@ -124,8 +124,8 @@ def _make_split_innerloop(X, con_indexes, cat_indexes, metric, is_categorical_fe
             dist_b = cdist(X_b, cm_b.reshape(1, -1), metric=lambda u, v: _mixed_metric(con_indexes, cat_indexes, u, v))
 
         elif np.all(is_categorical_feature):  # all categorical
-            modoid_a = stats.mode(X_a, axis=0).mode[0]
-            modoid_b = stats.mode(X_b, axis=0).mode[0]
+            modoid_a = stats.mode(X_a, axis=0, keepdims=True).mode[0]
+            modoid_b = stats.mode(X_b, axis=0, keepdims=True).mode[0]
 
             dist_a = cdist(X_a, modoid_a.reshape(1, -1), metric=metric)
             dist_b = cdist(X_b, modoid_b.reshape(1, -1), metric=metric)
