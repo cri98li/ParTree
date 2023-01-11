@@ -16,14 +16,11 @@ from ParTree.classes.ImpurityParTree import ImpurityParTree
 from ParTree.classes.PrincipalParTree import PrincipalParTree
 
 if __name__ == '__main__':
-    data = pd.read_csv('ParTree/test/datasets/real/titanic.csv', header=0)
+    data = pd.read_csv('Experiments/datasets/real/compas-scores-two-years.zip')
 
     #cptree = CenterParTree(n_jobs=12)
-    cptree = ImpurityParTree(n_jobs=24)
-    #cptree = PrincipalParTree(n_components=150)
-
-    data = data.drop(['PassengerId', 'Name', 'Ticket', 'Fare'], axis=1)
-
+    cptree = ImpurityParTree(n_jobs=12)
+    #cptree = PrincipalParTree(n_components=1)
 
     def remove_missing_values(df):
         for column_name, nbr_missing in df.isna().sum().to_dict().items():
