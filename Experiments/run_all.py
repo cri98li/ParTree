@@ -32,7 +32,7 @@ if __name__ == '__main__':
                 print(f"{mod.get_name()}:{mod.get_version()} already executed, skipping")
 
         try:
-            mod.run(datasets, "results")
+            mod.run(datasets, "results/")
             metadata[mod.get_name()] = mod.get_version()
         except Exception as e:
             raise e

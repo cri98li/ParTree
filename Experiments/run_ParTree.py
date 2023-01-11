@@ -16,18 +16,26 @@ import ParTree.algorithms.measures_utils as measures
 
 
 def run(datasets: list, destination_folder: str):
-    runs = [run_CenterParTree]
+    runs = [
+        ("CenterParTree", run_CenterParTree)
+    ]
 
-    for dataset in tqdm(datasets, position=0):
-        for f in tqdm(runs, position=1):
-            f(dataset)
+    datasets_bar = tqdm(datasets, position=0, leave=False)
+    for dataset in datasets_bar:
+        dataset_name = dataset.split('\\')[-1].split('/')[-1]
+        datasets_bar.set_description(f"Dataset name: {dataset_name}")
+
+        f_bar = tqdm(runs, position=1, leave=False)
+        for (name, f) in f_bar:
+            f_bar.set_description(f"Algorithm: {name}")
+            f(dataset, destination_folder)
 
 
-def run_CenterParTree(dataset: str):
+def run_CenterParTree(dataset: str, res_folder):
 
     is_syntetic = "syntetic" in dataset
 
-    df = pd.read_csv(dataset, header=None, index_col=None)
+    df = pd.read_csv(dataset, index_col=None)
     y = None
     if is_syntetic:
         y = df[df.columns[-1]]
@@ -42,20 +50,26 @@ def run_CenterParTree(dataset: str):
         [3],  # range(1, 100, 30),  # min_samples_leaf
         [5],  # range(2, 100, 30),  # min_samples_split
         range(10, 200 + 1, 50),  # max_nbr_values
-        range(5, 21, 5),  # max_nbr_values_cat
+        range(5, 15 + 1, 5),  # max_nbr_values_cat
         np.arange(.0, .3, .1),  # bic_eps
         [42],  # random_state
         ["euclidean"]  # metric
     ]
 
-    for els in tqdm(list(itertools.product(*parameters)), position=3):
+    els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
+    for els in els_bar:
+        els_bar.set_description("_".join([str(x) for x in els])+".csv")
+
         colNames = hyperparams_name+["time", "silhouette", "calinski_harabasz", "davies_bouldin"]
         if is_syntetic:
             colNames += ["r_score", "adj_rand", "mut_info_score", "adj_mutual_info_score", "norm_mutual_info_score",
                          "homog_score", "complete_score", "v_msr_score", "fwlks_mallows_score"]
 
-        filename = "_".join([str(x) for x in els])+".csv"
-        if os.path.exists(filename):
+        filename = "CenterParTree-" \
+                   + dataset.split("/")[-1].split("\\")[-1]+"-" \
+                   + ("_".join([str(x) for x in els])+".csv")
+
+        if os.path.exists(res_folder+filename):
             continue
 
         cpt = CenterParTree(els[0], els[1], els[2], els[3], els[4], els[5], els[6], els[7], els[8],
@@ -77,7 +91,7 @@ def run_CenterParTree(dataset: str):
         if is_syntetic:
             row += measures.get_metrics_s(cpt.labels_, y)
 
-        pd.DataFrame([row], columns=colNames).to_csv(filename)
+        pd.DataFrame([row], columns=colNames).to_csv(res_folder+filename, index=False)
 
 
 
