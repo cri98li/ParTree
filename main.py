@@ -16,10 +16,11 @@ from ParTree.classes.ImpurityParTree import ImpurityParTree
 from ParTree.classes.PrincipalParTree import PrincipalParTree
 
 if __name__ == '__main__':
-    data = pd.read_csv('Experiments/datasets/real/compas-scores-two-years.zip')
+    #data = pd.read_csv('Experiments/datasets/real/compas-scores-two-years.zip')
+    data = pd.read_csv('Experiments/datasets/real/adult_y.zip')
 
-    #cptree = CenterParTree(n_jobs=12)
-    cptree = ImpurityParTree(n_jobs=12)
+    cptree = CenterParTree(n_jobs=12, verbose=True)
+    #cptree = ImpurityParTree(n_jobs=12)
     #cptree = PrincipalParTree(n_components=1)
 
     def remove_missing_values(df):
