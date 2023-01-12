@@ -49,7 +49,8 @@ class ParTree(ABC):
             max_nbr_values_cat: Union[int, float] = np.inf,
             bic_eps: float = 0.0,
             random_state: int = None,
-            n_jobs: int = 1
+            n_jobs: int = 1,
+            verbose = False
     ):
         """
         Initialize the ParTree object.
@@ -86,6 +87,9 @@ class ParTree(ABC):
 
         :param n_jobs:
             The number of jobs to run in parallel.
+
+        :param verbose:
+
         """
         self.max_depth = max_depth
         self.max_nbr_clusters = max_nbr_clusters
@@ -96,6 +100,7 @@ class ParTree(ABC):
         self.bic_eps = bic_eps
         self.random_state = random_state
         self.n_jobs = n_jobs
+        self.verbose = verbose
         self.processPoolExecutor = None
 
         random.seed(self.random_state)

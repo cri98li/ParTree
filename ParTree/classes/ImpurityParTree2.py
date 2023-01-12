@@ -6,6 +6,7 @@ from sklearn.metrics import mean_absolute_percentage_error, r2_score
 from ParTree.algorithms.bic_estimator import bic
 from ParTree.algorithms.data_splitter import DecisionSplit
 from ParTree.classes import ParTree
+from tqdm.auto import tqdm
 
 
 def gini(labels):
@@ -96,7 +97,8 @@ class ImpurityParTree(ParTree):
             criteria_clf="entropy",
             criteria_reg="r2",
             agg_fun=np.mean,
-            n_jobs=1
+            n_jobs=1,
+            verbose = False
     ):
         """
         :param criteria_clf:
@@ -120,7 +122,8 @@ class ImpurityParTree(ParTree):
             max_nbr_values_cat,
             bic_eps,
             random_state,
-            n_jobs
+            n_jobs,
+            verbose
         )
         self.criteria_clf = criteria_clf
         self.criteria_reg = criteria_reg
@@ -135,8 +138,8 @@ class ImpurityParTree(ParTree):
 
         results = []
 
-        for n in range(n_features):
-            for feature in self.feature_values[n]:
+        for n in tqdm(range(n_features), position=0, leave=False, disable=not self.verbose):
+            for feature in tqdm(self.feature_values[n], position=1, leave=False, disable=not self.verbose):
                 results.append(self.processPoolExecutor.submit(_make_split_innerloop,
                                                                self.X,
                                                                self.criteria_clf,
@@ -147,7 +150,7 @@ class ImpurityParTree(ParTree):
                                                                n,
                                                                feature))
 
-        for res in results:
+        for res in tqdm(results, disable=not self.verbose):
             best_returned_impurity, best_returned_feature, best_returned_threshold = res.result()
 
             if best_returned_impurity < best_impurity:
@@ -167,18 +170,23 @@ class ImpurityParTree(ParTree):
 
 
 def _make_split_innerloop(X, criteria_clf, criteria_reg, agg_fun, is_categorical_feature, idx_iter, feature,
-                          threshold):
+                          threshold, X_perc=.2, min_X=1000):
 
     n_features = X.shape[1]
 
     if not is_categorical_feature[feature]:  # splitting feature is continuous
         cond = X[idx_iter, feature] <= threshold
-        X_a = X[idx_iter][cond]
-        X_b = X[idx_iter][~cond]
     else:  # splitting feature is categorical
         cond = X[idx_iter, feature] == threshold
-        X_a = X[idx_iter][cond]
-        X_b = X[idx_iter][~cond]
+
+
+    X_a = X[idx_iter][cond]
+    X_a = X_a[np.random.choice(X_a.shape[0], round(len(X_a) * X_perc) + 1 if round(len(X_a) * X_perc) > min_X
+                else len(X_a), replace=False)]
+    X_b = X[idx_iter][~cond]
+    X_b = X_b[np.random.choice(X_b.shape[0], round(len(X_b) * X_perc) + 1 if round(len(X_b) * X_perc) > min_X
+                else len(X_b), replace=False)]
+
 
     if len(X_a) == 0 or len(X_b) == 0:
         return [np.inf, None, None]
@@ -201,7 +209,7 @@ def _make_split_innerloop(X, criteria_clf, criteria_reg, agg_fun, is_categorical
             imp_a = criteria(X_a[:, target_feature], mean_val_a)
             imp_b = criteria(X_b[:, target_feature], mean_val_b)
 
-        impurity = len(X_a) / len(X[idx_iter]) * imp_a + len(X_b) / len(X[idx_iter]) * imp_b
+        impurity = len(X_a) / (len(X_a)+len(X_b)) * imp_a + len(X_b) / (len(X_a)+len(X_b)) * imp_b
         impurity_list.append(impurity)
 
     impurity_agg = agg_fun(impurity_list)

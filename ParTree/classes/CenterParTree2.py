@@ -1,9 +1,12 @@
+import random
+
 import numpy as np
 from itertools import repeat
 
 from scipy import stats
 from scipy.spatial.distance import cdist
 from scipy.spatial.distance import seuclidean, jaccard
+from tqdm.auto import tqdm
 
 from ParTree.algorithms.bic_estimator import bic
 from ParTree.classes.ParTree import ParTree
@@ -22,7 +25,8 @@ class CenterParTree(ParTree):
             bic_eps=0.0,
             random_state=None,
             metric="euclidean",
-            n_jobs=1
+            n_jobs=1,
+            verbose = False
     ):
         """
         For continuous features the algorithm uses "metric" distance, for categorical ones the Mode, and for mixed types
@@ -40,7 +44,8 @@ class CenterParTree(ParTree):
             max_nbr_values_cat,
             bic_eps,
             random_state,
-            n_jobs
+            n_jobs,
+            verbose
         )
         self.metric = metric
 
@@ -53,8 +58,8 @@ class CenterParTree(ParTree):
 
         results = []
 
-        for n in range(n_features):
-            for feature in self.feature_values[n]:
+        for n in tqdm(range(n_features), position=0, leave=False, disable=not self.verbose):
+            for feature in tqdm(self.feature_values[n], position=1, leave=False, disable=not self.verbose):
                 results.append(self.processPoolExecutor.submit(_make_split_innerloop,
                                                                self.X,
                                                                self.con_indexes,
@@ -65,7 +70,7 @@ class CenterParTree(ParTree):
                                                                n,
                                                                feature))
 
-        for res in results:
+        for res in tqdm(results, disable=not self.verbose):
             best_returned_mse, best_returned_feature, best_returned_threshold = res.result()
 
             if best_returned_mse < best_mse:
@@ -94,7 +99,7 @@ def _mixed_metric(con_indexes, cat_indexes, u, v):
 
 
 def _make_split_innerloop(X, con_indexes, cat_indexes, metric, is_categorical_feature, idx_iter, feature,
-                          threshold):
+                          threshold, X_perc=.2, min_X=1000):
 
     n_features = X.shape[1]
 
@@ -102,7 +107,11 @@ def _make_split_innerloop(X, con_indexes, cat_indexes, metric, is_categorical_fe
         else X[idx_iter, feature] <= threshold
 
     X_a = X[idx_iter][cond]
+    X_a = X_a[np.random.choice(X_a.shape[0], round(len(X_a)*X_perc)+1 if round(len(X_a)*X_perc) > min_X else len(X_a),
+                               replace=False)]
     X_b = X[idx_iter][~cond]
+    X_b = X_b[np.random.choice(X_b.shape[0], round(len(X_b)*X_perc)+1 if round(len(X_b)*X_perc) > min_X else len(X_b),
+                               replace=False)]
 
     if len(X_a) == 0 or len(X_b) == 0:
         return [np.inf, None, None]
@@ -125,8 +134,8 @@ def _make_split_innerloop(X, con_indexes, cat_indexes, metric, is_categorical_fe
         dist_b = cdist(X_b, cm_b.reshape(1, -1), metric=lambda u, v: _mixed_metric(con_indexes, cat_indexes, u, v))
 
     elif np.all(is_categorical_feature):  # all categorical
-        modoid_a = stats.mode(X_a, axis=0).mode[0]
-        modoid_b = stats.mode(X_b, axis=0).mode[0]
+        modoid_a = stats.mode(X_a, axis=0, keepdims=False).mode[0]
+        modoid_b = stats.mode(X_b, axis=0, keepdims=False).mode[0]
 
         dist_a = cdist(X_a, modoid_a.reshape(1, -1), metric=metric)
         dist_b = cdist(X_b, modoid_b.reshape(1, -1), metric=metric)
@@ -140,7 +149,8 @@ def _make_split_innerloop(X, con_indexes, cat_indexes, metric, is_categorical_fe
 
     mse_a = np.mean(dist_a)
     mse_b = np.mean(dist_b)
-    mse_tot = (len(X_a) / len(X[idx_iter]) * mse_a + len(X_b) / len(X[idx_iter]) * mse_b)
+    #mse_tot = (len(X_a) / len(X[idx_iter]) * mse_a + len(X_b) / len(X[idx_iter]) * mse_b)
+    mse_tot = (len(X_a) / (len(X_a) + len(X_b)) * mse_a + len(X_b) / (len(X_a)+ len(X_b)) * mse_b)
 
 
     return [mse_tot, feature, threshold]

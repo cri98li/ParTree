@@ -23,6 +23,8 @@ class PrincipalParTree(ParTree):
             n_components=1,
             oblique_splits=False,
             max_oblique_features=2,
+            n_jobs=1,
+            verbose = False
     ):
         """
         :param n_components:
@@ -44,6 +46,9 @@ class PrincipalParTree(ParTree):
             max_nbr_values_cat,
             bic_eps,
             random_state,
+            n_jobs,
+            verbose
+
         )
         self.n_components = n_components
         self.oblique_splits = oblique_splits
@@ -62,7 +67,7 @@ class PrincipalParTree(ParTree):
         clf_list = list()
         labels_list = list()
         bic_c_list = list()
-        for i in trange(n_components_split):
+        for i in trange(n_components_split, disable=not self.verbose):
             clf_i = DecisionTreeRegressor(
                 max_depth=1,
                 min_samples_leaf=self.min_samples_leaf,
