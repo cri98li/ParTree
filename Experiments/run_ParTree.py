@@ -34,66 +34,70 @@ def run(datasets: list, destination_folder: str):
 
 
 def run_CenterParTree(dataset: str, res_folder):
+    try:
+        has_y = "_y.zip" in dataset
 
-    has_y = "_y.zip" in dataset
-
-    df = pd.read_csv(dataset, index_col=None)
-    y = None
-    if has_y:
-        y = df[df.columns[-1]]
-        df = df.drop(columns=[df.columns[-1]])
-
-    hyperparams_name = ["max_depth", "max_nbr_clusters", "min_samples_leaf", "min_samples_split", "max_nbr_values",
-                        "max_nbr_values_cat", "bic_eps", "random_state", "metric"]
-
-    parameters = [
-        [len(np.unique(y))] if has_y else range(2, 10, 3),  # max_depth
-        range(2, 13, 3),  # max_nbr_clusters
-        [3],  # range(1, 100, 30),  # min_samples_leaf
-        [5],  # range(2, 100, 30),  # min_samples_split
-        range(10, 200 + 1, 50),  # max_nbr_values
-        range(5, 15 + 1, 5),  # max_nbr_values_cat
-        np.arange(.0, .3, .1),  # bic_eps
-        [42],  # random_state
-        ["euclidean"]  # metric
-    ]
-
-    els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
-    for els in els_bar:
-        els_bar.set_description("_".join([str(x) for x in els])+".csv")
-
-        colNames = hyperparams_name+["time", "silhouette", "calinski_harabasz", "davies_bouldin"]
+        df = pd.read_csv(dataset, index_col=None)
+        y = None
         if has_y:
-            colNames += ["r_score", "adj_rand", "mut_info_score", "adj_mutual_info_score", "norm_mutual_info_score",
-                         "homog_score", "complete_score", "v_msr_score", "fwlks_mallows_score"]
+            y = df[df.columns[-1]]
+            df = df.drop(columns=[df.columns[-1]])
 
-        filename = "CenterParTree2-" \
-                   + dataset.split("/")[-1].split("\\")[-1]+"-" \
-                   + ("_".join([str(x) for x in els])+".csv")
+        hyperparams_name = ["max_depth", "max_nbr_clusters", "min_samples_leaf", "min_samples_split", "max_nbr_values",
+                            "max_nbr_values_cat", "bic_eps", "random_state", "metric"]
 
-        if os.path.exists(res_folder+filename):
-            continue
+        parameters = [
+            [2, 3, 4, 6, 8, 10, 12],  # max_depth
+            [len(np.unique(y))] if has_y else range(2, 12 + 1, 2),  # max_nbr_clusters
+            [3, 30],  # range(1, 100, 30),  # min_samples_leaf
+            [5, 50],  # range(2, 100, 30),  # min_samples_split
+            [np.inf, 1000, 100],  # max_nbr_values
+            [np.inf, 20, 100],  # max_nbr_values_cat
+            np.arange(.0, .3, .1),  # bic_eps
+            [42],  # random_state
+            ["euclidean"]  # metric
+            ["jaccard"]
+        ]
 
-        cpt = CenterParTree(els[0], els[1], els[2], els[3], els[4], els[5], els[6], els[7], els[8],
-                            psutil.cpu_count(logical=False))
+        els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
+        for els in els_bar:
+            els_bar.set_description("_".join([str(x) for x in els])+".csv")
 
-        ct = ColumnTransformer([
-            ('std_scaler', StandardScaler(), make_column_selector(dtype_include=['int', 'float'])),
-            ("cat", OneHotEncoder(), make_column_selector(dtype_include="object"))],
-            remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=os.cpu_count())
+            colNames = hyperparams_name+["time", "silhouette", "calinski_harabasz", "davies_bouldin"]
+            if has_y:
+                colNames += ["r_score", "adj_rand", "mut_info_score", "adj_mutual_info_score", "norm_mutual_info_score",
+                             "homog_score", "complete_score", "v_msr_score", "fwlks_mallows_score"]
 
-        X = ct.fit_transform(df)
+            filename = "CenterParTree2-" \
+                       + dataset.split("/")[-1].split("\\")[-1]+"-" \
+                       + ("_".join([str(x) for x in els])+".csv")
 
-        start = time.time()
-        cpt.fit(X)
-        stop = time.time()
+            if os.path.exists(res_folder+filename):
+                continue
+
+            cpt = CenterParTree(els[0], els[1], els[2], els[3], els[4], els[5], els[6], els[7], els[8], els[9],
+                                psutil.cpu_count(logical=False))
+
+            ct = ColumnTransformer([
+                ('std_scaler', StandardScaler(), make_column_selector(dtype_include=['int', 'float'])),
+                ("cat", OneHotEncoder(), make_column_selector(dtype_include="object"))],
+                remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=os.cpu_count())
+
+            X = ct.fit_transform(df)
+
+            start = time.time()
+            cpt.fit(X)
+            stop = time.time()
 
 
-        row = list(els) + [stop-start] + measures.get_metrics_uns(X, cpt.labels_)
-        if has_y:
-            row += measures.get_metrics_s(cpt.labels_, y)
+            row = list(els) + [stop-start] + measures.get_metrics_uns(X, cpt.labels_)
+            if has_y:
+                row += measures.get_metrics_s(cpt.labels_, y)
 
-        pd.DataFrame([row], columns=colNames).to_csv(res_folder+filename, index=False)
+            pd.DataFrame([row], columns=colNames).to_csv(res_folder+filename, index=False)
+    except Exception as e:
+        print(f"Errore dataset {dataset}, parametri {'_'.join([str(x) for x in els])+'.csv'}")
+        print(e)
 
 
 def run_ImpurityParTree(dataset: str, res_folder):
@@ -110,12 +114,12 @@ def run_ImpurityParTree(dataset: str, res_folder):
                         "max_nbr_values_cat", "bic_eps", "random_state", "criteria_clf", "criteria_reg"]
 
     parameters = [
-        [len(np.unique(y))] if has_y else range(2, 10, 3),  # max_depth
-        range(2, 13, 3),  # max_nbr_clusters
-        [3],  # range(1, 100, 30),  # min_samples_leaf
-        [5],  # range(2, 100, 30),  # min_samples_split
-        range(10, 200 + 1, 50),  # max_nbr_values
-        range(5, 15 + 1, 5),  # max_nbr_values_cat
+        [2,3,4,6,8,10,12], # max_depth
+        [len(np.unique(y))] if has_y else range(2, 12 +1, 2),  # max_nbr_clusters
+        [3, 30],  # range(1, 100, 30),  # min_samples_leaf
+        [5, 50],  # range(2, 100, 30),  # min_samples_split
+        [np.inf, 1000, 100],  # max_nbr_values
+        [np.inf, 20, 100],  # max_nbr_values_cat
         np.arange(.0, .3, .1),  # bic_eps
         [42],  # random_state
         ["gini", "entropy", "me"],  # criteria_clf
@@ -124,40 +128,45 @@ def run_ImpurityParTree(dataset: str, res_folder):
 
     els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
     for els in els_bar:
-        els_bar.set_description("_".join([str(x) for x in els])+".csv")
+        try:
+            els_bar.set_description("_".join([str(x) for x in els])+".csv")
 
-        colNames = hyperparams_name+["time", "silhouette", "calinski_harabasz", "davies_bouldin"]
-        if has_y:
-            colNames += ["r_score", "adj_rand", "mut_info_score", "adj_mutual_info_score", "norm_mutual_info_score",
-                         "homog_score", "complete_score", "v_msr_score", "fwlks_mallows_score"]
+            colNames = hyperparams_name+["time", "silhouette", "calinski_harabasz", "davies_bouldin"]
+            if has_y:
+                colNames += ["r_score", "adj_rand", "mut_info_score", "adj_mutual_info_score", "norm_mutual_info_score",
+                             "homog_score", "complete_score", "v_msr_score", "fwlks_mallows_score"]
 
-        filename = "ImpurityParTree2-" \
-                   + dataset.split("/")[-1].split("\\")[-1]+"-" \
-                   + ("_".join([str(x) for x in els])+".csv")
+            filename = "ImpurityParTree2-" \
+                       + dataset.split("/")[-1].split("\\")[-1]+"-" \
+                       + ("_".join([str(x) for x in els])+".csv")
 
-        if os.path.exists(res_folder+filename):
-            continue
+            if os.path.exists(res_folder+filename):
+                continue
 
-        cpt = ImpurityParTree(els[0], els[1], els[2], els[3], els[4], els[5], els[6], els[7], els[8], els[9],
-                            n_jobs=psutil.cpu_count(logical=False))
+            cpt = ImpurityParTree(els[0], els[1], els[2], els[3], els[4], els[5], els[6], els[7], els[8], els[9],
+                                n_jobs=psutil.cpu_count(logical=False))
 
-        ct = ColumnTransformer([
-            ('std_scaler', StandardScaler(), make_column_selector(dtype_include=['int', 'float'])),
-            ("cat", OneHotEncoder(), make_column_selector(dtype_include="object"))],
-            remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=os.cpu_count())
+            ct = ColumnTransformer([
+                ('std_scaler', StandardScaler(), make_column_selector(dtype_include=['int', 'float'])),
+                ("cat", OneHotEncoder(), make_column_selector(dtype_include="object"))],
+                remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=os.cpu_count())
 
-        X = ct.fit_transform(df)
+            X = ct.fit_transform(df)
 
-        start = time.time()
-        cpt.fit(X)
-        stop = time.time()
+            start = time.time()
+            cpt.fit(X)
+            stop = time.time()
 
 
-        row = list(els) + [stop-start] + measures.get_metrics_uns(X, cpt.labels_)
-        if has_y:
-            row += measures.get_metrics_s(cpt.labels_, y)
+            row = list(els) + [stop-start] + measures.get_metrics_uns(X, cpt.labels_)
+            if has_y:
+                row += measures.get_metrics_s(cpt.labels_, y)
 
-        pd.DataFrame([row], columns=colNames).to_csv(res_folder+filename, index=False)
+            pd.DataFrame([row], columns=colNames).to_csv(res_folder+filename, index=False)
+        except Exception as e:
+            print(f"Errore dataset {dataset}, parametri {'_'.join([str(x) for x in els])+'.csv'}")
+            print(e)
+
 
 
 

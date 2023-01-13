@@ -121,8 +121,8 @@ def _make_split_innerloop(X, con_indexes, cat_indexes, metric, is_categorical_fe
             centroid_a = np.mean(X_a[:, ~is_categorical_feature], axis=0)
             centroid_b = np.mean(X_b[:, ~is_categorical_feature], axis=0)
 
-            modoid_a = stats.mode(X_a[:, is_categorical_feature], axis=0, keepdims=False).mode[0]
-            modoid_b = stats.mode(X_b[:, is_categorical_feature], axis=0, keepdims=False).mode[0]
+            modoid_a = stats.mode(X_a[:, is_categorical_feature], axis=0, keepdims=True).mode[0]
+            modoid_b = stats.mode(X_b[:, is_categorical_feature], axis=0, keepdims=True).mode[0]
 
             cm_a = np.zeros(n_features)
             cm_b = np.zeros(n_features)
