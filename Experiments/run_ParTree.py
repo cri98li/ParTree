@@ -8,7 +8,7 @@ import pandas as pd
 import pkg_resources
 import psutil as psutil
 from sklearn.compose import ColumnTransformer, make_column_selector
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import OneHotEncoder, StandardScaler, OrdinalEncoder
 from tqdm.auto import tqdm
 
 from ParTree.classes.CenterParTree2 import CenterParTree
@@ -34,33 +34,33 @@ def run(datasets: list, destination_folder: str):
 
 
 def run_CenterParTree(dataset: str, res_folder):
-    try:
-        has_y = "_y.zip" in dataset
+    has_y = "_y.zip" in dataset
 
-        df = pd.read_csv(dataset, index_col=None)
-        y = None
-        if has_y:
-            y = df[df.columns[-1]]
-            df = df.drop(columns=[df.columns[-1]])
+    df = pd.read_csv(dataset, index_col=None)
+    y = None
+    if has_y:
+        y = df[df.columns[-1]]
+        df = df.drop(columns=[df.columns[-1]])
 
-        hyperparams_name = ["max_depth", "max_nbr_clusters", "min_samples_leaf", "min_samples_split", "max_nbr_values",
-                            "max_nbr_values_cat", "bic_eps", "random_state", "metric"]
+    hyperparams_name = ["max_depth", "max_nbr_clusters", "min_samples_leaf", "min_samples_split", "max_nbr_values",
+                        "max_nbr_values_cat", "bic_eps", "random_state", "metric_con", "metric_cat"]
 
-        parameters = [
-            [2, 3, 4, 6, 8, 10, 12],  # max_depth
-            [len(np.unique(y))] if has_y else range(2, 12 + 1, 2),  # max_nbr_clusters
-            [3, 30],  # range(1, 100, 30),  # min_samples_leaf
-            [5, 50],  # range(2, 100, 30),  # min_samples_split
-            [np.inf, 1000, 100],  # max_nbr_values
-            [np.inf, 20, 100],  # max_nbr_values_cat
-            np.arange(.0, .3, .1),  # bic_eps
-            [42],  # random_state
-            ["euclidean"]  # metric
-            ["jaccard"]
-        ]
+    parameters = [
+        [2, 3, 4, 6, 8, 10, 12],  # max_depth
+        [len(np.unique(y))] if has_y else range(2, 12 + 1, 2),  # max_nbr_clusters
+        [3, 30],  # range(1, 100, 30),  # min_samples_leaf
+        [5, 50],  # range(2, 100, 30),  # min_samples_split
+        [np.inf, 1000, 100],  # max_nbr_values
+        [np.inf, 20, 100],  # max_nbr_values_cat
+        np.arange(.0, .3, .1),  # bic_eps
+        [42],  # random_state
+        ["cos"],  # metric
+        ["jaccard"]
+    ]
 
-        els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
-        for els in els_bar:
+    els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
+    for els in els_bar:
+        try:
             els_bar.set_description("_".join([str(x) for x in els])+".csv")
 
             colNames = hyperparams_name+["time", "silhouette", "calinski_harabasz", "davies_bouldin"]
@@ -80,7 +80,7 @@ def run_CenterParTree(dataset: str, res_folder):
 
             ct = ColumnTransformer([
                 ('std_scaler', StandardScaler(), make_column_selector(dtype_include=['int', 'float'])),
-                ("cat", OneHotEncoder(), make_column_selector(dtype_include="object"))],
+                ("cat", OrdinalEncoder(), make_column_selector(dtype_include="object"))],
                 remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=os.cpu_count())
 
             X = ct.fit_transform(df)
@@ -95,9 +95,9 @@ def run_CenterParTree(dataset: str, res_folder):
                 row += measures.get_metrics_s(cpt.labels_, y)
 
             pd.DataFrame([row], columns=colNames).to_csv(res_folder+filename, index=False)
-    except Exception as e:
-        print(f"Errore dataset {dataset}, parametri {'_'.join([str(x) for x in els])+'.csv'}")
-        print(e)
+        except Exception as e:
+            print(f"Errore dataset {dataset}, parametri {'_'.join([str(x) for x in els])+'.csv'}")
+            raise e
 
 
 def run_ImpurityParTree(dataset: str, res_folder):
@@ -165,7 +165,7 @@ def run_ImpurityParTree(dataset: str, res_folder):
             pd.DataFrame([row], columns=colNames).to_csv(res_folder+filename, index=False)
         except Exception as e:
             print(f"Errore dataset {dataset}, parametri {'_'.join([str(x) for x in els])+'.csv'}")
-            print(e)
+            raise e
 
 
 

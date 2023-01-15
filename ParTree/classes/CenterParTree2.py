@@ -6,6 +6,7 @@ from itertools import repeat
 from scipy import stats
 from scipy.spatial.distance import cdist
 from scipy.spatial.distance import seuclidean, jaccard
+from sklearn.metrics.pairwise import cosine_similarity
 from tqdm.auto import tqdm
 
 from ParTree.algorithms.bic_estimator import bic
@@ -24,10 +25,10 @@ class CenterParTree(ParTree):
             max_nbr_values_cat=10,
             bic_eps=0.0,
             random_state=None,
-            metric_con="euclidean",
+            metric_con="cos",
             metric_cat="jaccard",
             n_jobs=1,
-            verbose = False
+            verbose=False
     ):
         """
         For continuous features the algorithm uses "metric" distance, for categorical ones the Mode, and for mixed types
@@ -95,39 +96,43 @@ class CenterParTree(ParTree):
 
 
 def _mixed_metric(con_indexes, cat_indexes, u, v, metric_cat, metric_con):
-    #con_dist = seuclidean(u[con_indexes], v[con_indexes], V=np.ones(len(con_indexes)))
-    if self.metric_con == "cos":
-        cosine_similarity(u[con_indexes], v[con_indexes])
+    # con_dist = seuclidean(u[con_indexes], v[con_indexes], V=np.ones(len(con_indexes)))
+    con_dist = np.inf
+    if metric_con == "cos":
+        con_dist = cosine_similarity(u[con_indexes], v[con_indexes])
     else:
         con_dist = cdist(u[con_indexes], v[con_indexes], metric=metric_con)
-    #cat_dist = jaccard(u[cat_indexes], v[cat_indexes])
+    # cat_dist = jaccard(u[cat_indexes], v[cat_indexes])
     cat_dist = cdist(u[cat_indexes], v[cat_indexes], metric=metric_cat)
     con_w = len(con_indexes) / len(u)
     cat_w = len(cat_indexes) / len(u)
     dist = con_w * con_dist + cat_w * cat_dist
     return dist
 
-#dataset solo continui
+
+# dataset solo continui
 
 def _make_split_innerloop(X, con_indexes, cat_indexes, metric_cat, metric_con, is_categorical_feature, idx_iter,
                           feature, threshold, X_perc=.2, min_X=1000):
-
     n_features = X.shape[1]
 
     cond = X[idx_iter, feature] == threshold if is_categorical_feature[feature] \
         else X[idx_iter, feature] <= threshold
 
     X_a = X[idx_iter][cond]
-    X_a_sub = X_a[np.random.choice(X_a.shape[0], round(len(X_a)*X_perc)+1 if round(len(X_a)*X_perc) > min_X else len(X_a),
-                               replace=False)]
+    X_a_sub = X_a[
+        np.random.choice(X_a.shape[0], round(len(X_a) * X_perc) + 1 if round(len(X_a) * X_perc) > min_X else len(X_a),
+                         replace=False)]
     X_b = X[idx_iter][~cond]
-    X_b_sub = X_b[np.random.choice(X_b.shape[0], round(len(X_b)*X_perc)+1 if round(len(X_b)*X_perc) > min_X else len(X_b),
-                               replace=False)]
+    X_b_sub = X_b[
+        np.random.choice(X_b.shape[0], round(len(X_b) * X_perc) + 1 if round(len(X_b) * X_perc) > min_X else len(X_b),
+                         replace=False)]
 
     if len(X_a) == 0 or len(X_b) == 0:
         return [np.inf, None, None]
 
-    if np.sum(is_categorical_feature) != len(is_categorical_feature):  # mixed (np.any(is_categorical_feature) and not np.all(is_categorical_feature))
+    if np.sum(is_categorical_feature) != len(
+            is_categorical_feature):  # mixed (np.any(is_categorical_feature) and not np.all(is_categorical_feature))
         centroid_a = np.mean(X_a[:, ~is_categorical_feature], axis=0)
         centroid_b = np.mean(X_b[:, ~is_categorical_feature], axis=0)
 
@@ -141,8 +146,10 @@ def _make_split_innerloop(X, con_indexes, cat_indexes, metric_cat, metric_con, i
         cm_a[is_categorical_feature] = modoid_a
         cm_b[is_categorical_feature] = modoid_b
 
-        dist_a = cdist(X_a_sub, cm_a.reshape(1, -1), metric=lambda u, v: _mixed_metric(con_indexes, cat_indexes, u, v))
-        dist_b = cdist(X_b_sub, cm_b.reshape(1, -1), metric=lambda u, v: _mixed_metric(con_indexes, cat_indexes, u, v))
+        dist_a = cdist(X_a_sub, cm_a.reshape(1, -1), metric=lambda u, v: _mixed_metric(con_indexes, cat_indexes, u, v,
+                                                                                       metric_con, metric_cat))
+        dist_b = cdist(X_b_sub, cm_b.reshape(1, -1), metric=lambda u, v: _mixed_metric(con_indexes, cat_indexes, u, v,
+                                                                                       metric_con, metric_cat))
 
     elif np.all(is_categorical_feature):  # all categorical
         modoid_a = stats.mode(X_a, axis=0, keepdims=True).mode[0]
@@ -160,8 +167,7 @@ def _make_split_innerloop(X, con_indexes, cat_indexes, metric_cat, metric_con, i
 
     mse_a = np.mean(dist_a)
     mse_b = np.mean(dist_b)
-    #mse_tot = (len(X_a) / len(X[idx_iter]) * mse_a + len(X_b) / len(X[idx_iter]) * mse_b)
-    mse_tot = (len(X_a) / (len(X_a) + len(X_b)) * mse_a + len(X_b) / (len(X_a)+ len(X_b)) * mse_b)
-
+    # mse_tot = (len(X_a) / len(X[idx_iter]) * mse_a + len(X_b) / len(X[idx_iter]) * mse_b)
+    mse_tot = (len(X_a) / (len(X_a) + len(X_b)) * mse_a + len(X_b) / (len(X_a) + len(X_b)) * mse_b)
 
     return [mse_tot, feature, threshold]
