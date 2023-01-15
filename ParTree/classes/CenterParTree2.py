@@ -96,14 +96,13 @@ class CenterParTree(ParTree):
 
 
 def _mixed_metric(con_indexes, cat_indexes, u, v, metric_cat, metric_con):
-    # con_dist = seuclidean(u[con_indexes], v[con_indexes], V=np.ones(len(con_indexes)))
     con_dist = np.inf
     if metric_con == "cos":
-        con_dist = cosine_similarity(u[con_indexes], v[con_indexes])
+        con_dist = cosine_similarity(u[con_indexes].reshape(1, -1), v[con_indexes].reshape(1, -1))
     else:
-        con_dist = cdist(u[con_indexes], v[con_indexes], metric=metric_con)
+        con_dist = cdist(u[con_indexes].reshape(1, -1), v[con_indexes].reshape(1, -1), metric=metric_con)
     # cat_dist = jaccard(u[cat_indexes], v[cat_indexes])
-    cat_dist = cdist(u[cat_indexes], v[cat_indexes], metric=metric_cat)
+    cat_dist = cdist(u[cat_indexes].reshape(1, -1), v[cat_indexes].reshape(1, -1), metric=metric_cat)
     con_w = len(con_indexes) / len(u)
     cat_w = len(cat_indexes) / len(u)
     dist = con_w * con_dist + cat_w * cat_dist
