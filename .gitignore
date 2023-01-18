@@ -131,3 +131,5 @@ dmypy.json
 #jetbrains
 .idea/
 /commands.txt
+
+Experiments/results_from_servers/*
