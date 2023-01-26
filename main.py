@@ -3,7 +3,7 @@ import time
 import numpy as np
 import pandas as pd
 from sklearn.compose import make_column_selector, ColumnTransformer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, OrdinalEncoder
 
 from ParTree.algorithms.measures_utils import get_metrics_uns, get_metrics_s
 from ParTree.classes.ParTree import print_rules
@@ -17,11 +17,11 @@ from ParTree.classes.PrincipalParTree import PrincipalParTree
 
 if __name__ == '__main__':
     #data = pd.read_csv('Experiments/datasets/real/compas-scores-two-years.zip')
-    data = pd.read_csv('Experiments/datasets/real/adult_y.zip')
+    data = pd.read_csv('Experiments/datasets/real/wdbc_y.zip')
 
-    cptree = CenterParTree(n_jobs=12, verbose=True)
+    #cptree = CenterParTree(4, 12, 3, 5, 1000, 20, 0.1, 42, "cos", "jaccard", n_jobs=12, verbose=True)
     #cptree = ImpurityParTree(n_jobs=12)
-    #cptree = PrincipalParTree(n_components=1)
+    cptree = PrincipalParTree(2, 2, 3, 5, np.inf, np.inf, 0.0, 42, 1, False, 0)
 
     def remove_missing_values(df):
         for column_name, nbr_missing in df.isna().sum().to_dict().items():
@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     ct = ColumnTransformer([
         ('std_scaler', scaler, make_column_selector(dtype_include=['int', 'float'])),
-        ("cat", OneHotEncoder(), make_column_selector(dtype_include="object"))],
+        ("cat", OrdinalEncoder(), make_column_selector(dtype_include="object"))],
         remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=12)
 
     data = pd.DataFrame(ct.fit_transform(data), columns=ct.get_feature_names_out())

@@ -333,7 +333,8 @@ class ParTree(ABC):
                 if not clf_dict.is_oblique:
                     feat = clf.tree_.feature[0]
                     thr = clf.tree_.threshold[0]
-                    rule = (True, [feat], [1.0], thr, False, cur_depth)
+                    cat = feat in self.cat_indexes
+                    rule = (True, [feat], [1.0], thr, cat, cur_depth)
                 else:
                     pca_feat = clf.oblq_clf.tree_.feature[0]
                     thr = clf.oblq_clf.tree_.threshold[0]

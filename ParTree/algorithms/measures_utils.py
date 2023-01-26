@@ -17,14 +17,8 @@ def get_metrics_s(clust_id, y):
 
 
 def get_metrics_uns(X, clust_id):
-    try:
-        silhouette = "%.4f" % silhouette_score(X, clust_id)
-        calinski_harabasz = "%.4f" % calinski_harabasz_score(X, clust_id)
-        davies_bouldin = "%.4f" % davies_bouldin_score(X, clust_id)
-    except ValueError:
-        silhouette = 0
-        calinski_harabasz = 0
-        davies_bouldin = 0
-        pass
+    silhouette = "%.4f" % silhouette_score(X, clust_id)
+    calinski_harabasz = "%.4f" % calinski_harabasz_score(X, clust_id)
+    davies_bouldin = "%.4f" % davies_bouldin_score(X, clust_id)
 
     return [silhouette, calinski_harabasz, davies_bouldin]

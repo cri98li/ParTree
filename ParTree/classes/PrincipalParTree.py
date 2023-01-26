@@ -1,5 +1,7 @@
+import mca as mca
 import numpy as np
-from sklearn.decomposition import PCA
+import pandas as pd
+from light_famd import PCA, MFA, FAMD, MCA
 from sklearn.tree import DecisionTreeRegressor
 
 from ParTree.algorithms.bic_estimator import bic
@@ -18,13 +20,13 @@ class PrincipalParTree(ParTree):
             min_samples_split=5,
             max_nbr_values=np.inf,
             max_nbr_values_cat=np.inf,
-            random_state=None,
             bic_eps=0.0,
+            random_state=None,
             n_components=1,
             oblique_splits=False,
             max_oblique_features=2,
             n_jobs=1,
-            verbose = False
+            verbose=False
     ):
         """
         :param n_components:
@@ -61,8 +63,21 @@ class PrincipalParTree(ParTree):
 
     def _make_split(self, idx_iter):
         n_components_split = min(self.n_components, len(idx_iter))
-        pca = PCA(n_components=n_components_split)
-        y_pca = pca.fit_transform(self.X[idx_iter])
+
+        if len(self.con_indexes) == 0: #all caregorical
+            transf =  MCA(n_components=n_components_split, random_state=self.random_state)
+        elif len(self.cat_indexes) == 0: #all continous
+            transf = PCA(n_components=n_components_split, random_state=self.random_state)
+        else: #mixed
+            transf = FAMD(n_components=n_components_split, random_state=self.random_state)
+
+
+        typed_X = pd.DataFrame(self.X[idx_iter])
+
+        for index in self.cat_indexes:
+            typed_X[index] = typed_X[index].apply(lambda x: str(x))
+
+        y_pca = transf.fit_transform(typed_X)
 
         clf_list = list()
         labels_list = list()
@@ -84,7 +99,7 @@ class PrincipalParTree(ParTree):
 
             if self.oblique_splits and i > 0:
                 olq_clf_i = ObliqueHouseHolderSplit(
-                    pca=pca,
+                    pca=transf,
                     max_oblique_features=self.max_oblique_features,
                     min_samples_leaf=self.min_samples_leaf,
                     min_samples_split=self.min_samples_split,
