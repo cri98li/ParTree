@@ -1,0 +1,2 @@
+max_depth,max_nbr_clusters,min_samples_leaf,min_samples_split,max_nbr_values,max_nbr_values_cat,bic_eps,random_state,metric_con,metric_cat,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
+2,4,3,5,inf,inf,0.0,42,cos,jaccard,0.3053629398345947,0,0,0,0.2481,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.4981,CenterParTree2,tetra_y.zip
