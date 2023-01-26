@@ -1,5 +1,5 @@
 numpy>=1.15.*
 scikit-learn>=0.21.*
-tqdm
-scipy
-setuptools
+tqdm~=4.64.1
+scipy~=1.10.0
+setuptools~=60.2.0
