@@ -1,3 +1,4 @@
+import numpy as np
 from sklearn.metrics import *
 
 
@@ -17,6 +18,9 @@ def get_metrics_s(clust_id, y):
 
 
 def get_metrics_uns(X, clust_id):
+    if len(np.unique(clust_id)) == 1:
+        return [.0, .0, .0]
+
     silhouette = "%.4f" % silhouette_score(X, clust_id)
     calinski_harabasz = "%.4f" % calinski_harabasz_score(X, clust_id)
     davies_bouldin = "%.4f" % davies_bouldin_score(X, clust_id)

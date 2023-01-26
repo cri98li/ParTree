@@ -118,7 +118,7 @@ def run_pyclust_xmeans(dataset: str, res_folder):
 
     parameters = [
         [len(np.unique(y))] if has_y else range(2, 12 + 1, 2),  # number_clusters
-        [len(np.unique(y))] if has_y else np.range(2, 12 * 2 + 1, 2 * 2),  # kmax
+        [len(np.unique(y))] if has_y else range(2, 12 * 2 + 1, 2 * 2),  # kmax
     ]
 
     els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
@@ -176,8 +176,8 @@ def run_sklearn_kmeans(dataset: str, res_folder):
         y = df[df.columns[-1]]
         df = df.drop(columns=[df.columns[-1]])
 
-    hyperparams_name = ["n_clusters", "init", "n_init", "max_iter", "max_iter", "tol",
-                        "verbose", "random_state", "copy", "algorithm", ]
+    hyperparams_name = ["n_clusters", "init", "n_init", "max_iter", "tol",
+                        "verbose", "random_state", "copy", "algorithm"]
 
     parameters = [
         [len(np.unique(y))] if has_y else range(2, 12 + 1, 2),  # n_clusters
@@ -241,7 +241,7 @@ def run_sklearn_bis_kmeans(dataset: str, res_folder):
         y = df[df.columns[-1]]
         df = df.drop(columns=[df.columns[-1]])
 
-    hyperparams_name = ["n_clusters", "init", "n_init", "max_iter", "max_iter", "tol",
+    hyperparams_name = ["n_clusters", "init", "n_init", "max_iter", "tol",
                         "verbose", "random_state", "copy", "algorithm", "bisecting_strategy"]
 
     parameters = [
@@ -527,8 +527,8 @@ def run_sklearn_agglomerativeClust(dataset: str, res_folder):
 
             pd.DataFrame([row], columns=colNames).to_csv(res_folder + filename, index=False)
         except Exception as e:
-            print(f"Errore dataset {dataset}, parametri {'_'.join([str(x) for x in els]) + '.csv'}")
-            raise e
+            print(f"Errore dataset {dataset}, parametri {'_'.join([str(x) for x in els]) + '.csv'} \n\t{e}")
+            #raise e
 
 
 def run_sklearn_birch(dataset: str, res_folder):
@@ -590,7 +590,7 @@ def run_sklearn_birch(dataset: str, res_folder):
 
 
 if __name__ == '__main__':
-    run(["datasets/real/adult.zip"])
+    run(["datasets/real/adult.zip"], "")
 
 
 def get_name():
