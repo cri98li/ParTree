@@ -3,8 +3,14 @@ from glob import glob
 import os
 
 import run_ParTree as rpt
+import run_kmeans_DT as rkd
+import run_classicClustering as rcc
 
-modules = [rpt]
+modules = [
+    rcc,
+    rkd,
+    rpt
+]
 
 
 def read_status():
