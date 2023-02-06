@@ -1,0 +1,2 @@
+amount_initial_centers,kmax,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
+7,7,0.0300331115722656,0.4723,5844.9831,0.7001,0.8236,0.4437,1.2065,0.6686,0.6694,0.7195,0.6259,0.6694,0.5615,pyc_xmeans,cure-t2-4k_y.zip

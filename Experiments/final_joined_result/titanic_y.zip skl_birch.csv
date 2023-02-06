@@ -1,0 +1,2 @@
+threshold,branching_factor,n_clusters,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
+0.5,50,2,0.0376176834106445,0.8003,1628.6909,0.4425,0.5392,0.0455,0.013,0.0254,0.0265,0.0196,0.041,0.0265,0.6758,skl_birch,titanic_y.zip

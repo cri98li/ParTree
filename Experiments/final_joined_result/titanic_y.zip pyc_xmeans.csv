@@ -1,0 +1,2 @@
+amount_initial_centers,kmax,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
+2,2,0.00844407081604,0.8047,1637.2069,0.4159,0.5379,0.0417,0.0117,0.0231,0.0243,0.0176,0.0389,0.0243,0.6787,pyc_xmeans,titanic_y.zip

@@ -1,0 +1,7 @@
+number_clusters,time,silhouette,calinski_harabasz,davies_bouldin,alg,dataset
+10,398.708021402359,0.0862,70.2298,0.8282,pyc_agglomerativeClust,wine.zip
+12,399.719078540802,0.0388,60.338,0.859,pyc_agglomerativeClust,wine.zip
+2,401.15718936920166,0.7511,28.1353,0.178,pyc_agglomerativeClust,wine.zip
+4,402.18084383010864,0.6981,32.009,0.2804,pyc_agglomerativeClust,wine.zip
+6,398.5751776695252,0.495,56.8181,0.4814,pyc_agglomerativeClust,wine.zip
+8,399.7381389141083,0.3459,46.2533,0.609,pyc_agglomerativeClust,wine.zip

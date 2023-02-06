@@ -1,0 +1,2 @@
+amount_initial_centers,kmax,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
+3,3,0.0036070346832275,0.4993,94.929,0.8575,0.5758,0.243,0.3227,0.3845,0.391,0.3011,0.5576,0.391,0.6312,pyc_xmeans,zelnik6_y.zip

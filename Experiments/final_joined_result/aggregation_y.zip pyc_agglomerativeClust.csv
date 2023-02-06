@@ -1,0 +1,2 @@
+number_clusters,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
+7,0.227475881576538,0.225,463.7423,0.9082,0.7918,0.3833,1.109,0.6401,0.6452,0.6544,0.6362,0.6452,0.5159,pyc_agglomerativeClust,aggregation_y.zip

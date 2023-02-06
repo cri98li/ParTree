@@ -71,7 +71,7 @@ def run_pyclust_agglomerativeClust(dataset: str, res_folder):
                 colNames += ["r_score", "adj_rand", "mut_info_score", "adj_mutual_info_score", "norm_mutual_info_score",
                              "homog_score", "complete_score", "v_msr_score", "fwlks_mallows_score"]
 
-            filename = "pyc_agglomerativeClust" \
+            filename = "pyc_agglomerativeClust-" \
                        + dataset.split("/")[-1].split("\\")[-1] + "-" \
                        + ("_".join([str(x) for x in els]) + ".csv")
 
@@ -590,7 +590,8 @@ def run_sklearn_birch(dataset: str, res_folder):
 
 
 if __name__ == '__main__':
-    run(["datasets/real/adult.zip"], "")
+    pass
+    #TODO: test
 
 
 def get_name():

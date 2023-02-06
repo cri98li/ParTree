@@ -1,0 +1,2 @@
+threshold,branching_factor,n_clusters,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
+0.5,50,4,0.0153543949127197,0.503,1490.3664,0.77,0.8752,0.6925,1.0725,0.8142,0.8148,0.838,0.7928,0.8148,0.7805,skl_birch,triangle2_y.zip

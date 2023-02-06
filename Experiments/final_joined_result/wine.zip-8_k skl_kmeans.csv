@@ -1,0 +1,4 @@
+n_clusters,init,n_init,max_iter,tol,verbose,random_state,copy,algorithm,time,silhouette,calinski_harabasz,davies_bouldin,alg,dataset
+8,k-means++,11,100,0.0001,False,42,True,lloyd,1.273855686187744,0.1773,1092.8485,1.6217,skl_kmeans,wine.zip-8_k
+8,k-means++,11,300,0.0001,False,42,True,lloyd,1.1949865818023682,0.1773,1092.8485,1.6217,skl_kmeans,wine.zip-8_k
+8,k-means++,11,500,0.0001,False,42,True,lloyd,1.1871182918548584,0.1773,1092.8485,1.6217,skl_kmeans,wine.zip-8_k

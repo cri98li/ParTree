@@ -1,0 +1,7 @@
+threshold,branching_factor,n_clusters,time,silhouette,calinski_harabasz,davies_bouldin,alg,dataset
+0.5,50,10,0.882615327835083,0.1539,858.3203,1.6055,skl_birch,wine.zip
+0.5,50,12,0.8579764366149902,0.1468,765.1738,1.6244,skl_birch,wine.zip
+0.5,50,2,0.8580193519592285,0.2053,1551.6826,1.889,skl_birch,wine.zip
+0.5,50,4,0.8596904277801514,0.1752,1256.684,1.9071,skl_birch,wine.zip
+0.5,50,6,0.8961012363433838,0.1307,1025.1097,1.8663,skl_birch,wine.zip
+0.5,50,8,0.8592221736907959,0.1491,917.0044,1.6633,skl_birch,wine.zip

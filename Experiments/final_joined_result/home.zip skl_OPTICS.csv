@@ -1,0 +1,16 @@
+min_samples,max_eps,metric,algorithm,n_jobs,time,silhouette,calinski_harabasz,davies_bouldin,alg,dataset
+10,inf,correlation,auto,4,1.2148487567901611,-0.1316,25.8791,1.3536,skl_OPTICS,home.zip
+10,inf,cosine,auto,4,1.8799006938934328,-0.0411,38.4104,1.238,skl_OPTICS,home.zip
+10,inf,euclidean,auto,4,0.879000186920166,-0.119,15.8379,1.5,skl_OPTICS,home.zip
+20,inf,correlation,auto,4,1.1968443393707275,-0.0015,34.1488,1.6886,skl_OPTICS,home.zip
+20,inf,cosine,auto,4,2.068692684173584,-0.0386,30.3349,1.3731,skl_OPTICS,home.zip
+20,inf,euclidean,auto,4,0.8819353580474854,-0.0897,19.1687,1.4963,skl_OPTICS,home.zip
+2,inf,correlation,auto,4,1.185417890548706,0.1513,8.0571,1.2949,skl_OPTICS,home.zip
+2,inf,cosine,auto,4,1.8647964000701904,0.2048,7.8682,1.1933,skl_OPTICS,home.zip
+2,inf,euclidean,auto,4,1.1915743350982666,0.1731,4.0143,1.3177,skl_OPTICS,home.zip
+3,inf,correlation,auto,4,1.1964161396026611,-0.0547,7.5035,1.3568,skl_OPTICS,home.zip
+3,inf,cosine,auto,4,2.045974016189575,0.0461,9.7753,1.2436,skl_OPTICS,home.zip
+3,inf,euclidean,auto,4,0.8751163482666016,-0.0356,6.8683,1.3243,skl_OPTICS,home.zip
+5,inf,correlation,auto,4,1.1905531883239746,-0.1961,11.66,1.2698,skl_OPTICS,home.zip
+5,inf,cosine,auto,4,1.832317590713501,-0.0085,15.2653,1.3312,skl_OPTICS,home.zip
+5,inf,euclidean,auto,4,0.8818371295928955,-0.1679,6.958,1.3991,skl_OPTICS,home.zip

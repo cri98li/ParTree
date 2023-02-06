@@ -1,0 +1,2 @@
+amount_initial_centers,kmax,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
+3,3,0.015296459197998,0.4457,2075.9472,0.7782,0.5963,0.2667,0.3644,0.4221,0.4228,0.5702,0.3359,0.4228,0.6295,pyc_xmeans,cure-t0-2000n-2D_y.zip

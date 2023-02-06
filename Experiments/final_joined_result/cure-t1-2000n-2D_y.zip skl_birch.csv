@@ -1,0 +1,2 @@
+threshold,branching_factor,n_clusters,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
+0.5,50,6,0.0289900302886962,0.4824,2805.3287,0.7385,0.8259,0.5343,1.2432,0.7794,0.7803,0.8723,0.7059,0.7803,0.6624,skl_birch,cure-t1-2000n-2D_y.zip

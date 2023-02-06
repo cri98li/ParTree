@@ -1,0 +1,11 @@
+n_clusters,metric,linkage,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
+15,correlation,average,0.2820391654968261,-0.4735,153.6785,5.2418,0.5625,0.1176,0.6085,0.3484,0.3531,0.2248,0.8233,0.3531,0.3421,skl_agglomerativeClust,s-set2_y.zip
+15,correlation,complete,0.2699980735778808,-0.0408,153.076,152.2994,0.7892,0.0931,0.6108,0.2447,0.2509,0.2256,0.2826,0.2509,0.2087,skl_agglomerativeClust,s-set2_y.zip
+15,correlation,single,0.1533365249633789,-0.2439,153.659,1.0783,0.56,0.1178,0.6041,0.3499,0.3531,0.2232,0.8451,0.3531,0.3435,skl_agglomerativeClust,s-set2_y.zip
+15,cosine,average,0.3361032009124756,0.3906,3513.1502,1.1911,0.96,0.7021,2.1561,0.8094,0.8108,0.7965,0.8257,0.8108,0.7258,skl_agglomerativeClust,s-set2_y.zip
+15,cosine,complete,0.3302047252655029,0.3292,3218.0731,1.4621,0.951,0.6324,2.0713,0.7759,0.7776,0.7652,0.7904,0.7776,0.6604,skl_agglomerativeClust,s-set2_y.zip
+15,cosine,single,0.1364741325378418,0.0916,1642.6117,5.0195,0.8572,0.3978,1.5408,0.6879,0.6903,0.5692,0.877,0.6903,0.5266,skl_agglomerativeClust,s-set2_y.zip
+15,euclidean,average,0.3644328117370605,0.6073,12062.9951,0.4784,0.9918,0.9343,2.5701,0.9494,0.9498,0.9494,0.9502,0.9498,0.9387,skl_agglomerativeClust,s-set2_y.zip
+15,euclidean,complete,0.3452448844909668,0.4406,6667.2303,0.7098,0.9571,0.6825,2.2404,0.8384,0.8396,0.8276,0.852,0.8396,0.7079,skl_agglomerativeClust,s-set2_y.zip
+15,euclidean,single,0.1050617694854736,-0.5947,2.7555,0.7685,0.0732,0.0,0.0103,0.001,0.0075,0.0038,0.2968,0.0075,0.2571,skl_agglomerativeClust,s-set2_y.zip
+15,euclidean,ward,0.4215493202209472,0.6121,12602.803,0.4787,0.9912,0.9298,2.565,0.9476,0.948,0.9475,0.9485,0.948,0.9345,skl_agglomerativeClust,s-set2_y.zip

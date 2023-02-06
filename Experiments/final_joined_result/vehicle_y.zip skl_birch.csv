@@ -1,0 +1,2 @@
+threshold,branching_factor,n_clusters,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
+0.5,50,4,0.0521795749664306,0.2775,383.9198,1.1708,0.6184,0.0862,0.1528,0.1177,0.1216,0.1103,0.1356,0.1216,0.3515,skl_birch,vehicle_y.zip

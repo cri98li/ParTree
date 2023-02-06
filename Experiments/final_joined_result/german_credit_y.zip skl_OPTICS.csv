@@ -1,0 +1,16 @@
+min_samples,max_eps,metric,algorithm,n_jobs,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
+10,inf,correlation,auto,4,2.588592290878296,-0.1789,9.5285,2.0941,0.5546,-0.0144,0.0037,0.0034,0.008,0.006,0.0118,0.008,0.7108,skl_OPTICS,german_credit_y.zip
+10,inf,cosine,auto,4,4.378769874572754,-0.1759,12.2117,2.0781,0.5497,-0.0142,0.004,0.004,0.0082,0.0066,0.0108,0.0082,0.6981,skl_OPTICS,german_credit_y.zip
+10,inf,euclidean,auto,4,14.796435117721558,0.0,0.0,0.0,0.5796,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.7613,skl_OPTICS,german_credit_y.zip
+20,inf,correlation,auto,4,2.5901010036468506,0.0376,17.8439,1.5894,0.5764,0.0072,0.0005,-0.0002,0.0013,0.0008,0.0047,0.0013,0.7483,skl_OPTICS,german_credit_y.zip
+20,inf,cosine,auto,4,5.215201616287232,0.0376,17.8439,1.5894,0.5764,0.0072,0.0005,-0.0002,0.0013,0.0008,0.0047,0.0013,0.7483,skl_OPTICS,german_credit_y.zip
+20,inf,euclidean,auto,4,15.08759617805481,0.0,0.0,0.0,0.5796,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.7613,skl_OPTICS,german_credit_y.zip
+2,inf,correlation,auto,4,2.5743253231048584,-0.1182,3.2126,1.4546,0.4463,-0.0312,0.157,0.0256,0.0833,0.2571,0.0497,0.0833,0.3729,skl_OPTICS,german_credit_y.zip
+2,inf,cosine,auto,4,3.946846008300781,-0.1219,3.215,1.4614,0.4528,-0.0227,0.1591,0.0302,0.0862,0.2604,0.0517,0.0862,0.3875,skl_OPTICS,german_credit_y.zip
+2,inf,euclidean,auto,4,15.302916288375854,-0.1469,2.8833,1.4586,0.464,-0.0203,0.1402,0.0271,0.0834,0.2295,0.051,0.0834,0.4323,skl_OPTICS,german_credit_y.zip
+3,inf,correlation,auto,4,2.5963363647460938,-0.2222,3.8214,1.5923,0.4827,-0.0488,0.0608,0.021,0.0538,0.0996,0.0368,0.0538,0.5393,skl_OPTICS,german_credit_y.zip
+3,inf,cosine,auto,4,5.030014514923096,-0.2202,3.976,1.569,0.4832,-0.0482,0.0588,0.0197,0.0523,0.0962,0.0359,0.0523,0.5404,skl_OPTICS,german_credit_y.zip
+3,inf,euclidean,auto,4,15.142335891723633,-0.2573,3.5669,1.5796,0.5059,-0.0418,0.0413,0.0166,0.0462,0.0676,0.0351,0.0462,0.6032,skl_OPTICS,german_credit_y.zip
+5,inf,correlation,auto,4,2.5802435874938965,-0.2195,6.5625,1.8524,0.5283,-0.041,0.0169,0.017,0.0278,0.0277,0.0279,0.0278,0.665,skl_OPTICS,german_credit_y.zip
+5,inf,cosine,auto,4,4.589004039764404,-0.2415,5.4347,1.8225,0.5304,-0.0437,0.0221,0.0252,0.0376,0.0362,0.0391,0.0376,0.6727,skl_OPTICS,german_credit_y.zip
+5,inf,euclidean,auto,4,17.175830125808716,-0.2441,5.3894,1.8091,0.5567,-0.0086,0.0116,0.0146,0.0239,0.019,0.0323,0.0239,0.7116,skl_OPTICS,german_credit_y.zip

@@ -1,0 +1,11 @@
+n_clusters,metric,linkage,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
+2,correlation,average,0.0117216110229492,0.7101,9.529,0.1865,0.527,0.0014,0.0011,0.001,0.0032,0.0016,0.123,0.0032,0.7252,skl_agglomerativeClust,titanic_y.zip
+2,correlation,complete,0.0114951133728027,0.7203,78.3731,0.2519,0.5286,0.0065,0.0025,0.0053,0.007,0.0038,0.049,0.007,0.7212,skl_agglomerativeClust,titanic_y.zip
+2,correlation,single,0.0067765712738037,0.7101,9.529,0.1865,0.527,0.0014,0.0011,0.001,0.0032,0.0016,0.123,0.0032,0.7252,skl_agglomerativeClust,titanic_y.zip
+2,cosine,average,0.0117948055267333,0.711,18.8989,0.3114,0.5265,0.0005,0.0001,-0.002,0.0002,0.0001,0.0039,0.0002,0.7241,skl_agglomerativeClust,titanic_y.zip
+2,cosine,complete,0.0115854740142822,0.7236,141.458,0.3026,0.5314,0.014,0.0062,0.015,0.0165,0.0093,0.0726,0.0165,0.7181,skl_agglomerativeClust,titanic_y.zip
+2,cosine,single,0.0067584514617919,0.7101,9.529,0.1865,0.527,0.0014,0.0011,0.001,0.0032,0.0016,0.123,0.0032,0.7252,skl_agglomerativeClust,titanic_y.zip
+2,euclidean,average,0.0114498138427734,0.8052,1264.7327,0.3029,0.5337,0.027,0.0074,0.0154,0.0166,0.0111,0.0336,0.0166,0.6947,skl_agglomerativeClust,titanic_y.zip
+2,euclidean,complete,0.0111019611358642,0.8052,1264.7327,0.3029,0.5337,0.027,0.0074,0.0154,0.0166,0.0111,0.0336,0.0166,0.6947,skl_agglomerativeClust,titanic_y.zip
+2,euclidean,single,0.0088756084442138,0.7101,9.529,0.1865,0.527,0.0014,0.0011,0.001,0.0032,0.0016,0.123,0.0032,0.7252,skl_agglomerativeClust,titanic_y.zip
+2,euclidean,ward,0.0122907161712646,0.8092,1503.7005,0.3458,0.5325,0.0271,0.0064,0.0128,0.014,0.0097,0.0252,0.014,0.6858,skl_agglomerativeClust,titanic_y.zip

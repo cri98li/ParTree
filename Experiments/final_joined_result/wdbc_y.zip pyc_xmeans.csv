@@ -1,0 +1,2 @@
+amount_initial_centers,kmax,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
+2,2,0.0085546970367431,0.3447,267.6804,1.3093,0.8394,0.6765,0.3638,0.5614,0.562,0.551,0.5735,0.562,0.8527,pyc_xmeans,wdbc_y.zip

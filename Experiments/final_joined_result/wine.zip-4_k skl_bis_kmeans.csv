@@ -1,0 +1,7 @@
+n_clusters,init,n_init,max_iter,tol,verbose,random_state,copy,algorithm,bisecting_strategy,time,silhouette,calinski_harabasz,davies_bouldin,alg,dataset
+4,k-means++,11,100,0.0001,False,42,True,lloyd,biggest_inertia,3.1923210620880127,0.1667,1380.5673,1.7962,skl_bis_kmeans,wine.zip-4_k
+4,k-means++,11,100,0.0001,False,42,True,lloyd,largest_cluster,3.248208284378052,0.1667,1380.5673,1.7962,skl_bis_kmeans,wine.zip-4_k
+4,k-means++,11,300,0.0001,False,42,True,lloyd,biggest_inertia,3.2957918643951416,0.1667,1380.5673,1.7962,skl_bis_kmeans,wine.zip-4_k
+4,k-means++,11,300,0.0001,False,42,True,lloyd,largest_cluster,3.1323916912078857,0.1667,1380.5673,1.7962,skl_bis_kmeans,wine.zip-4_k
+4,k-means++,11,500,0.0001,False,42,True,lloyd,biggest_inertia,3.235922574996948,0.1667,1380.5673,1.7962,skl_bis_kmeans,wine.zip-4_k
+4,k-means++,11,500,0.0001,False,42,True,lloyd,largest_cluster,3.195776462554932,0.1667,1380.5673,1.7962,skl_bis_kmeans,wine.zip-4_k

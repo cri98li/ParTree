@@ -1,0 +1,16 @@
+min_samples,max_eps,metric,algorithm,n_jobs,time,silhouette,calinski_harabasz,davies_bouldin,alg,dataset
+10,inf,correlation,auto,4,21.132732391357425,-0.3966,24.4446,1.3404,skl_OPTICS,wine.zip
+10,inf,cosine,auto,4,30.924471378326416,-0.3888,24.6232,1.3002,skl_OPTICS,wine.zip
+10,inf,euclidean,auto,4,15.152768850326538,-0.3665,23.7253,1.1998,skl_OPTICS,wine.zip
+20,inf,correlation,auto,4,21.302226066589355,-0.1887,62.1132,1.1285,skl_OPTICS,wine.zip
+20,inf,cosine,auto,4,30.470398426055908,-0.3305,45.3755,1.3671,skl_OPTICS,wine.zip
+20,inf,euclidean,auto,4,14.419204950332642,-0.0294,30.2916,1.0198,skl_OPTICS,wine.zip
+2,inf,correlation,auto,4,21.05089282989502,0.1068,4.9419,1.3538,skl_OPTICS,wine.zip
+2,inf,cosine,auto,4,30.856041431427,0.1311,5.1254,1.2749,skl_OPTICS,wine.zip
+2,inf,euclidean,auto,4,14.982521057128906,0.1843,4.7615,1.2158,skl_OPTICS,wine.zip
+3,inf,correlation,auto,4,21.070959091186523,-0.2305,6.075,1.4768,skl_OPTICS,wine.zip
+3,inf,cosine,auto,4,31.172730445861816,-0.219,5.9367,1.369,skl_OPTICS,wine.zip
+3,inf,euclidean,auto,4,15.394522190093994,-0.2058,5.267,1.2556,skl_OPTICS,wine.zip
+5,inf,correlation,auto,4,21.1303768157959,-0.3816,10.214,1.4703,skl_OPTICS,wine.zip
+5,inf,cosine,auto,4,31.377301931381226,-0.3707,9.8051,1.405,skl_OPTICS,wine.zip
+5,inf,euclidean,auto,4,14.249722719192505,-0.3903,9.2887,1.3108,skl_OPTICS,wine.zip
