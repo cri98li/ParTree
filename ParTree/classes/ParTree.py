@@ -1,11 +1,11 @@
 import heapq
 import random
+from abc import ABC, abstractmethod
 from concurrent.futures import ProcessPoolExecutor
+from itertools import count
 from typing import Union
 
 import numpy as np
-
-from abc import ABC, abstractmethod
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 from ParTree.algorithms.bic_estimator import bic
@@ -131,6 +131,7 @@ class ParTree(ABC):
         pass
 
     def fit(self, X):
+        tiebreaker = count()  # counter for the priority queue. Used in case of the same -len(idx)
 
         self.processPoolExecutor = ProcessPoolExecutor(self.n_jobs, initializer=init_pool, initargs=(X,))
 
@@ -144,7 +145,7 @@ class ParTree(ABC):
         cluster_id = 0
         root_node = ParTree_node(idx, cluster_id)
 
-        heapq.heappush(self.queue, (-len(idx), (idx, 0, root_node)))
+        heapq.heappush(self.queue, (-len(idx), (next(tiebreaker), idx, 0, root_node)))
 
         nbr_curr_clusters = 0
 
@@ -155,7 +156,7 @@ class ParTree(ABC):
         self.cat_indexes = np.array([i for i in range(n_features) if self.is_categorical_feature[i]])
 
         while len(self.queue) > 0 and nbr_curr_clusters + len(self.queue) <= self.max_nbr_clusters:
-            _, (idx_iter, node_depth, node) = heapq.heappop(self.queue)
+            _, (_, idx_iter, node_depth, node) = heapq.heappop(self.queue)
 
             nbr_samples = len(idx_iter)
 
@@ -200,8 +201,8 @@ class ParTree(ABC):
             node.is_oblique = is_oblique
 
             # TODO: chiarire q-score
-            heapq.heappush(self.queue, (-len(idx_all_l) + 0.00001 * bic_l, (idx_all_l, node_depth + 1, node_l)))
-            heapq.heappush(self.queue, (-len(idx_all_r) + 0.00001 * bic_r, (idx_all_r, node_depth + 1, node_r)))
+            heapq.heappush(self.queue, (-len(idx_all_l) + 0.00001 * bic_l, (next(tiebreaker), idx_all_l, node_depth + 1, node_l)))
+            heapq.heappush(self.queue, (-len(idx_all_r) + 0.00001 * bic_r, (next(tiebreaker), idx_all_r, node_depth + 1, node_r)))
 
         self.clf_dict_ = root_node
         self.label_encoder_ = LabelEncoder()

@@ -1,12 +1,10 @@
-from itertools import repeat
-
 import numpy as np
 from sklearn.metrics import mean_absolute_percentage_error, r2_score
+from tqdm.auto import tqdm
 
 from ParTree.algorithms.bic_estimator import bic
 from ParTree.algorithms.data_splitter import DecisionSplit
 from ParTree.classes import ParTree
-from tqdm.auto import tqdm
 
 
 def gini(labels):
@@ -136,19 +134,22 @@ class ImpurityParTree(ParTree):
         best_threshold = None
         best_impurity = np.inf
 
-        for res in tqdm(self.processPoolExecutor.map(_make_split_innerloop,
-                                                repeat(self.X),
-                                                repeat(self.criteria_clf),
-                                                repeat(self.criteria_reg),
-                                                repeat(self.agg_fun),
-                                                repeat(self.is_categorical_feature),
-                                                repeat(idx_iter),
-                                                range(n_features),
-                                                repeat(self.feature_values),
-                                                repeat(self.verbose)),
-                        disable=not self.verbose, position=0, leave=False):
+        results = []
 
-            best_returned_impurity, best_returned_feature, best_returned_threshold = res
+        for n in tqdm(range(n_features), position=0, leave=False, disable=not self.verbose):
+            for feature in tqdm(self.feature_values[n], position=1, leave=False, disable=not self.verbose):
+                results.append(self.processPoolExecutor.submit(_make_split_innerloop,
+                                                               self.X,
+                                                               self.criteria_clf,
+                                                               self.criteria_reg,
+                                                               self.agg_fun,
+                                                               self.is_categorical_feature,
+                                                               idx_iter,
+                                                               n,
+                                                               feature))
+
+        for res in tqdm(results, disable=not self.verbose):
+            best_returned_impurity, best_returned_feature, best_returned_threshold = res.result()
 
             if best_returned_impurity < best_impurity:
                 best_feature = best_returned_feature
@@ -167,58 +168,48 @@ class ImpurityParTree(ParTree):
 
 
 def _make_split_innerloop(X, criteria_clf, criteria_reg, agg_fun, is_categorical_feature, idx_iter, feature,
-                          feature_values, verbose, X_perc=.2, min_X=1000):
-    best_feature = None
-    best_threshold = None
-    best_impurity = np.inf
+                          threshold, X_perc=.2, min_X=1000):
 
     n_features = X.shape[1]
 
-    for feature in tqdm(self.feature_values[n], position=1, leave=False, disable=not verbose):
+    if not is_categorical_feature[feature]:  # splitting feature is continuous
+        cond = X[idx_iter, feature] <= threshold
+    else:  # splitting feature is categorical
+        cond = X[idx_iter, feature] == threshold
 
-        if not is_categorical_feature[feature]:  # splitting feature is continuous
-            cond = X[idx_iter, feature] <= threshold
-        else:  # splitting feature is categorical
-            cond = X[idx_iter, feature] == threshold
 
-        X_a = X[idx_iter][cond]
-        X_a = X_a[np.random.choice(X_a.shape[0],
-                                   round(len(X_a) * X_perc) + 1 if round(len(X_a) * X_perc) > min_X else len(X_a),
-                                   replace=False)]
-        X_b = X[idx_iter][~cond]
-        X_b = X_b[np.random.choice(X_b.shape[0],
-                                   round(len(X_b) * X_perc) + 1 if round(len(X_b) * X_perc) > min_X else len(X_b),
-                                   replace=False)]
+    X_a = X[idx_iter][cond]
+    X_a = X_a[np.random.choice(X_a.shape[0], round(len(X_a) * X_perc) + 1 if round(len(X_a) * X_perc) > min_X
+                else len(X_a), replace=False)]
+    X_b = X[idx_iter][~cond]
+    X_b = X_b[np.random.choice(X_b.shape[0], round(len(X_b) * X_perc) + 1 if round(len(X_b) * X_perc) > min_X
+                else len(X_b), replace=False)]
 
-        if len(X_a) == 0 or len(X_b) == 0:
+
+    if len(X_a) == 0 or len(X_b) == 0:
+        return [np.inf, None, None]
+
+    impurity_list = list()
+
+    for target_feature in range(n_features):
+        if target_feature == feature:
             continue
 
-        impurity_list = list()
+        if is_categorical_feature[target_feature]:
+            criteria = CRITERIA_CLF[criteria_clf]
+            imp_a = criteria(X_a[:, target_feature])
+            imp_b = criteria(X_b[:, target_feature])
 
-        for target_feature in range(n_features):
-            if target_feature == feature:
-                continue
+        else:
+            criteria = CRITERIA_REG[criteria_reg]
+            mean_val_a = np.array([np.mean(X_a[:, target_feature])] * len(X_a))
+            mean_val_b = np.array([np.mean(X_b[:, target_feature])] * len(X_b))
+            imp_a = criteria(X_a[:, target_feature], mean_val_a)
+            imp_b = criteria(X_b[:, target_feature], mean_val_b)
 
-            if is_categorical_feature[target_feature]:
-                criteria = CRITERIA_CLF[criteria_clf]
-                imp_a = criteria(X_a[:, target_feature])
-                imp_b = criteria(X_b[:, target_feature])
+        impurity = len(X_a) / (len(X_a)+len(X_b)) * imp_a + len(X_b) / (len(X_a)+len(X_b)) * imp_b
+        impurity_list.append(impurity)
 
-            else:
-                criteria = CRITERIA_REG[criteria_reg]
-                mean_val_a = np.array([np.mean(X_a[:, target_feature])] * len(X_a))
-                mean_val_b = np.array([np.mean(X_b[:, target_feature])] * len(X_b))
-                imp_a = criteria(X_a[:, target_feature], mean_val_a)
-                imp_b = criteria(X_b[:, target_feature], mean_val_b)
+    impurity_agg = agg_fun(impurity_list)
 
-            impurity = len(X_a) / (len(X_a)+len(X_b)) * imp_a + len(X_b) / (len(X_a)+len(X_b)) * imp_b
-            impurity_list.append(impurity)
-
-        impurity_agg = agg_fun(impurity_list)
-
-        if impurity_agg < best_impurity:
-            best_feature = feature
-            best_threshold = threshold
-            best_impurity = impurity_agg
-
-    return [best_impurity, best_feature, best_threshold]
+    return [impurity_agg, feature, threshold]

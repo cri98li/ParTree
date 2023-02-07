@@ -1,14 +1,12 @@
-import mca as mca
 import numpy as np
 import pandas as pd
-from light_famd import PCA, MFA, FAMD, MCA
 from sklearn.tree import DecisionTreeRegressor
+from tqdm.auto import trange
 
 from ParTree.algorithms.bic_estimator import bic
 from ParTree.algorithms.data_splitter import ObliqueHouseHolderSplit
 from ParTree.classes import ParTree
-
-from tqdm.auto import tqdm, trange
+from ParTree.light_famd import MCA, PCA, FAMD
 
 
 class PrincipalParTree(ParTree):
