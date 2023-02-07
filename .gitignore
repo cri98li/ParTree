@@ -133,3 +133,4 @@ dmypy.json
 /commands.txt
 
 Experiments/results_from_servers/*
+Experiments/results.tar
