@@ -133,13 +133,13 @@ def run_kmeansPartree(dataset: str, res_folder):
         y = df[df.columns[-1]]
         df = df.drop(columns=[df.columns[-1]])
 
-    hyperparams_name = ["n_clusters", "labels_as_tree_leaves", "init", "n_init", "max_iter", "max_iter", "tol",
+    hyperparams_name = ["n_clusters", "labels_as_tree_leaves", "init", "n_init", "max_iter", "tol",
                         "verbose", "random_state", "copy", "algorithm", "criterion", "splitter", "min_samples_split",
                         "min_samples_leaf", "min_weight_fraction_leaf", "max_features", "max_leaf_nodes",
                         "min_impurity_decrease", "class_weight", "ccp_alpha"]
 
     parameters = [
-        [len(np.unique(y))] if has_y else range(2, 12 + 1, 2),  # n_clusters
+        range(2, 12 + 1, 2),  # n_clusters
         [True],  # labels_as_tree_leaves
         ["k-means++"],  # init
         [11],  # n_init

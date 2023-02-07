@@ -3,16 +3,10 @@ import time
 import numpy as np
 import pandas as pd
 from sklearn.compose import make_column_selector, ColumnTransformer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder, OrdinalEncoder
+from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 
 from ParTree.algorithms.measures_utils import get_metrics_uns, get_metrics_s
 from ParTree.classes.ParTree import print_rules
-
-import ParTree.classes.ParTree
-from ParTree.classes.CenterParTree2 import CenterParTree
-#from ParTree.classes.CenterParTree import CenterParTree
-#from ParTree.classes.ImpurityParTree2 import ImpurityParTree
-from ParTree.classes.ImpurityParTree import ImpurityParTree
 from ParTree.classes.PrincipalParTree import PrincipalParTree
 
 if __name__ == '__main__':

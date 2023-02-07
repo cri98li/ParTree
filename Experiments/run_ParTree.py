@@ -12,17 +12,17 @@ from sklearn.compose import ColumnTransformer, make_column_selector
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, OrdinalEncoder
 from tqdm.auto import tqdm
 
-from ParTree.classes.CenterParTree2 import CenterParTree
-from ParTree.classes.ImpurityParTree2 import ImpurityParTree
+from ParTree.classes.CenterParTree import CenterParTree
+from ParTree.classes.ImpurityParTree import ImpurityParTree
 import ParTree.algorithms.measures_utils as measures
 from ParTree.classes.PrincipalParTree import PrincipalParTree
 
 
 def run(datasets: list, destination_folder: str):
     runs = [
-        #("CenterParTree2", run_CenterParTree),
-        #("ImpurityParTree2", run_ImpurityParTree),
-        ("PrincipalParTree", run_PrincipalParTree)
+        ("PrincipalParTree", run_PrincipalParTree),
+        ("CenterParTree2", run_CenterParTree),
+        ("ImpurityParTree2", run_ImpurityParTree),
     ]
 
     datasets_bar = tqdm(datasets, position=0, leave=False)
@@ -50,7 +50,8 @@ def run_CenterParTree(dataset: str, res_folder):
 
     parameters = [
         [2, 3, 4, 6, 8, 10, 12],  # max_depth
-        [len(np.unique(y))] if has_y else range(2, 12 + 1, 2),  # max_nbr_clusters
+        #[len(np.unique(y))] if has_y else range(2, 12 + 1, 2),  # max_nbr_clusters
+        [],  # max_nbr_clusters
         [3, 30],  # range(1, 100, 30),  # min_samples_leaf
         [5, 50],  # range(2, 100, 30),  # min_samples_split
         [np.inf, 1000, 100],  # max_nbr_values
@@ -117,7 +118,7 @@ def run_ImpurityParTree(dataset: str, res_folder):
 
     parameters = [
         [2,3,4,6,8,10,12], # max_depth
-        [len(np.unique(y))] if has_y else range(2, 12 +1, 2),  # max_nbr_clusters
+        range(2, 12 +1, 2),  # max_nbr_clusters
         [3, 30],  # range(1, 100, 30),  # min_samples_leaf
         [5, 50],  # range(2, 100, 30),  # min_samples_split
         [np.inf, 1000, 100],  # max_nbr_values
@@ -188,7 +189,7 @@ def run_PrincipalParTree(dataset:str, res_folder):
 
         parameters = [
             [2, 3, 4, 6, 8, 10, 12],  # max_depth
-            [len(np.unique(y))] if has_y else range(2, 12 + 1, 2),  # max_nbr_clusters
+            range(2, 12 + 1, 2),  # max_nbr_clusters
             [3, 30],  # range(1, 100, 30),  # min_samples_leaf
             [5, 50],  # range(2, 100, 30),  # min_samples_split
             [np.inf, 1000, 100],  # max_nbr_values

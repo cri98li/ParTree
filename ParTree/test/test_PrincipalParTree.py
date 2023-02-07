@@ -1,15 +1,15 @@
 import time
 import unittest
+
+import numpy as np
 import pandas as pd
 import psutil
-import numpy as np
 from sklearn.compose import ColumnTransformer, make_column_selector
 from sklearn.preprocessing import OrdinalEncoder
 
 from ParTree.algorithms.measures_utils import get_metrics_uns, get_metrics_s
 from ParTree.classes.ParTree import print_rules
 from ParTree.classes.PrincipalParTree import PrincipalParTree
-
 
 
 class TestPrincipalParTree(unittest.TestCase):

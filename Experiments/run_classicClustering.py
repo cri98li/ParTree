@@ -58,7 +58,7 @@ def run_pyclust_agglomerativeClust(dataset: str, res_folder):
     hyperparams_name = ["number_clusters"]
 
     parameters = [
-        [len(np.unique(y))] if has_y else range(2, 12 + 1, 2),  # number_clusters
+        range(2, 12 + 1, 2),  # number_clusters
     ]
 
     els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
@@ -117,8 +117,8 @@ def run_pyclust_xmeans(dataset: str, res_folder):
     hyperparams_name = ["amount_initial_centers", "kmax"]
 
     parameters = [
-        [len(np.unique(y))] if has_y else range(2, 12 + 1, 2),  # number_clusters
-        [len(np.unique(y))] if has_y else range(2, 12 * 2 + 1, 2 * 2),  # kmax
+        range(2, 12 + 1, 2),  # number_clusters
+        range(2, 12 * 2 + 1, 2 * 2),  # kmax
     ]
 
     els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
@@ -180,7 +180,7 @@ def run_sklearn_kmeans(dataset: str, res_folder):
                         "verbose", "random_state", "copy", "algorithm"]
 
     parameters = [
-        [len(np.unique(y))] if has_y else range(2, 12 + 1, 2),  # n_clusters
+        range(2, 12 + 1, 2),  # n_clusters
         ["k-means++"],  # init
         [11],  # n_init
         [100, 300, 500],  # max_iter
@@ -245,7 +245,7 @@ def run_sklearn_bis_kmeans(dataset: str, res_folder):
                         "verbose", "random_state", "copy", "algorithm", "bisecting_strategy"]
 
     parameters = [
-        [len(np.unique(y))] if has_y else range(2, 12 + 1, 2),  # n_clusters
+        range(2, 12 + 1, 2),  # n_clusters
         ["k-means++"],  # init
         [11],  # n_init
         [100, 300, 500],  # max_iter
@@ -309,7 +309,7 @@ def run_kmodes(dataset: str, res_folder):
     hyperparams_name = ["n_clusters", "max_iter", "init", "n_init", "verbose", "random_state", "n_jobs"]
 
     parameters = [
-        [len(np.unique(y))] if has_y else range(2, 12 + 1, 2),  # n_clusters
+        range(2, 12 + 1, 2),  # n_clusters
         [100, 300, 500],  # max_iter
         ["Cao"],  # init
         [11],  # n_init
@@ -486,13 +486,16 @@ def run_sklearn_agglomerativeClust(dataset: str, res_folder):
     hyperparams_name = ["n_clusters", "metric", "linkage"]
 
     parameters = [
-        [len(np.unique(y))] if has_y else range(2, 12 + 1, 2),  # n_clusters
+        range(2, 12 + 1, 2),  # n_clusters
         ["euclidean", "cosine", "correlation"], #metric
         ["ward", "complete", "average", "single"], #linkage: single->min, complete->max
     ]
 
     els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
     for els in els_bar:
+        if els[-1] == "ward" and els[1] != "euclidean":
+            continue
+
         try:
             els_bar.set_description("_".join([str(x) for x in els]) + ".csv")
 
@@ -545,7 +548,7 @@ def run_sklearn_birch(dataset: str, res_folder):
     parameters = [
         [.5], #threshold
         [50], #branching_factor
-        [len(np.unique(y))] if has_y else range(2, 12 + 1, 2),  # n_clusters
+        range(2, 12 + 1, 2),  # n_clusters
     ]
 
     els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
