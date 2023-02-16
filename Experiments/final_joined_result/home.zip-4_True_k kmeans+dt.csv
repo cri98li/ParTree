@@ -1,0 +1,13 @@
+n_clusters,labels_as_tree_leaves,init,n_init,max_iter,tol,verbose,random_state,copy,algorithm,criterion,splitter,min_samples_split,min_samples_leaf,min_weight_fraction_leaf,max_features,max_leaf_nodes,min_impurity_decrease,class_weight,ccp_alpha,time,silhouette,calinski_harabasz,davies_bouldin,alg,dataset
+4,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,30,50,0.0,,,0.0,,0.0,0.0898871421813964,0.2292,145.672,1.4181,kmeans+dt,home.zip-4_True_k
+4,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,30,5,0.0,,,0.0,,0.0,0.1173288822174072,0.2401,165.9687,1.313,kmeans+dt,home.zip-4_True_k
+4,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,3,50,0.0,,,0.0,,0.0,0.0886585712432861,0.2292,145.672,1.4181,kmeans+dt,home.zip-4_True_k
+4,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,3,5,0.0,,,0.0,,0.0,0.1488299369812011,0.2401,165.9687,1.313,kmeans+dt,home.zip-4_True_k
+4,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,30,50,0.0,,,0.0,,0.0,0.0938789844512939,0.2292,145.672,1.4181,kmeans+dt,home.zip-4_True_k
+4,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,30,5,0.0,,,0.0,,0.0,0.0933382511138916,0.2401,165.9687,1.313,kmeans+dt,home.zip-4_True_k
+4,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,3,50,0.0,,,0.0,,0.0,0.0892398357391357,0.2292,145.672,1.4181,kmeans+dt,home.zip-4_True_k
+4,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,3,5,0.0,,,0.0,,0.0,0.0867092609405517,0.2401,165.9687,1.313,kmeans+dt,home.zip-4_True_k
+4,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,30,50,0.0,,,0.0,,0.0,0.097510814666748,0.2292,145.672,1.4181,kmeans+dt,home.zip-4_True_k
+4,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,30,5,0.0,,,0.0,,0.0,0.1110498905181884,0.2401,165.9687,1.313,kmeans+dt,home.zip-4_True_k
+4,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,3,50,0.0,,,0.0,,0.0,0.089015245437622,0.2292,145.672,1.4181,kmeans+dt,home.zip-4_True_k
+4,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,3,5,0.0,,,0.0,,0.0,0.0905051231384277,0.2401,165.9687,1.313,kmeans+dt,home.zip-4_True_k

@@ -1,0 +1,4 @@
+n_clusters,init,n_init,max_iter,tol,verbose,random_state,copy,algorithm,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
+8,k-means++,11,100,0.0001,False,42,True,lloyd,0.652900218963623,0.1785,41.0084,1.9393,0.5442,0.1331,0.2818,0.2125,0.2187,0.4317,0.1464,0.2187,0.4154,skl_kmeans,ionosphere_y.zip-8_k
+8,k-means++,11,300,0.0001,False,42,True,lloyd,0.4991617202758789,0.1785,41.0084,1.9393,0.5442,0.1331,0.2818,0.2125,0.2187,0.4317,0.1464,0.2187,0.4154,skl_kmeans,ionosphere_y.zip-8_k
+8,k-means++,11,500,0.0001,False,42,True,lloyd,0.5942926406860352,0.1785,41.0084,1.9393,0.5442,0.1331,0.2818,0.2125,0.2187,0.4317,0.1464,0.2187,0.4154,skl_kmeans,ionosphere_y.zip-8_k

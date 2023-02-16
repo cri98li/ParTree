@@ -1,0 +1,13 @@
+n_clusters,labels_as_tree_leaves,init,n_init,max_iter,tol,verbose,random_state,copy,algorithm,criterion,splitter,min_samples_split,min_samples_leaf,min_weight_fraction_leaf,max_features,max_leaf_nodes,min_impurity_decrease,class_weight,ccp_alpha,time,silhouette,calinski_harabasz,davies_bouldin,alg,dataset
+6,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,30,50,0.0,,,0.0,,0.0,1.102128505706787,0.0602,572.4166,2.8171,kmeans+dt,wine.zip-6_True_k
+6,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,30,5,0.0,,,0.0,,0.0,1.027054786682129,0.0703,571.2015,2.0883,kmeans+dt,wine.zip-6_True_k
+6,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,3,50,0.0,,,0.0,,0.0,1.11073637008667,0.0602,572.4166,2.8171,kmeans+dt,wine.zip-6_True_k
+6,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,3,5,0.0,,,0.0,,0.0,1.1009979248046875,0.0703,571.2015,2.0883,kmeans+dt,wine.zip-6_True_k
+6,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,30,50,0.0,,,0.0,,0.0,0.9385886192321776,0.0602,572.4166,2.8171,kmeans+dt,wine.zip-6_True_k
+6,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,30,5,0.0,,,0.0,,0.0,1.135061264038086,0.0703,571.2015,2.0883,kmeans+dt,wine.zip-6_True_k
+6,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,3,50,0.0,,,0.0,,0.0,1.0948739051818848,0.0602,572.4166,2.8171,kmeans+dt,wine.zip-6_True_k
+6,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,3,5,0.0,,,0.0,,0.0,1.037322998046875,0.0703,571.2015,2.0883,kmeans+dt,wine.zip-6_True_k
+6,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,30,50,0.0,,,0.0,,0.0,1.0762035846710205,0.0602,572.4166,2.8171,kmeans+dt,wine.zip-6_True_k
+6,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,30,5,0.0,,,0.0,,0.0,1.0661308765411377,0.0703,571.2015,2.0883,kmeans+dt,wine.zip-6_True_k
+6,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,3,50,0.0,,,0.0,,0.0,1.113830327987671,0.0602,572.4166,2.8171,kmeans+dt,wine.zip-6_True_k
+6,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,3,5,0.0,,,0.0,,0.0,1.095827341079712,0.0703,571.2015,2.0883,kmeans+dt,wine.zip-6_True_k

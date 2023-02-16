@@ -1,2 +1,7 @@
 number_clusters,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
+10,0.7291059494018555,0.2827,24.37,0.9157,0.5819,0.1373,0.0819,0.1213,0.1357,0.1241,0.1498,0.1357,0.6812,pyc_agglomerativeClust,wdbc_y.zip
+12,0.7311036586761475,0.2645,20.8039,0.944,0.5816,0.1367,0.0823,0.1166,0.1343,0.1246,0.1457,0.1343,0.6808,pyc_agglomerativeClust,wdbc_y.zip
 2,0.7221765518188477,0.6607,27.8727,0.4497,0.5335,0.0048,0.0035,0.0067,0.0102,0.0053,0.1489,0.0102,0.7281,pyc_agglomerativeClust,wdbc_y.zip
+4,0.7337865829467773,0.3571,21.764,1.017,0.5265,-0.0053,0.0073,0.0102,0.0187,0.011,0.0605,0.0187,0.7121,pyc_agglomerativeClust,wdbc_y.zip
+6,0.7315108776092529,0.3314,15.7166,0.7942,0.5274,-0.0029,0.0143,0.022,0.0358,0.0217,0.1032,0.0358,0.7116,pyc_agglomerativeClust,wdbc_y.zip
+8,0.7271029949188232,0.3284,12.7563,0.629,0.5283,-0.0006,0.016,0.0202,0.0394,0.0243,0.1042,0.0394,0.711,pyc_agglomerativeClust,wdbc_y.zip

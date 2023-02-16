@@ -1,0 +1,13 @@
+n_clusters,labels_as_tree_leaves,init,n_init,max_iter,tol,verbose,random_state,copy,algorithm,criterion,splitter,min_samples_split,min_samples_leaf,min_weight_fraction_leaf,max_features,max_leaf_nodes,min_impurity_decrease,class_weight,ccp_alpha,time,silhouette,calinski_harabasz,davies_bouldin,alg,dataset
+12,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,30,50,0.0,,,0.0,,0.0,1.1221041679382324,0.077,477.896,2.3651,kmeans+dt,wine.zip-12_True_k
+12,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,30,5,0.0,,,0.0,,0.0,1.0379278659820557,0.0695,442.4094,2.3189,kmeans+dt,wine.zip-12_True_k
+12,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,3,50,0.0,,,0.0,,0.0,1.1985695362091064,0.077,477.896,2.3651,kmeans+dt,wine.zip-12_True_k
+12,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,3,5,0.0,,,0.0,,0.0,1.1822574138641355,0.0637,414.5509,2.1978,kmeans+dt,wine.zip-12_True_k
+12,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,30,50,0.0,,,0.0,,0.0,1.2885422706604004,0.077,477.896,2.3651,kmeans+dt,wine.zip-12_True_k
+12,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,30,5,0.0,,,0.0,,0.0,1.2295198440551758,0.0695,442.4094,2.3189,kmeans+dt,wine.zip-12_True_k
+12,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,3,50,0.0,,,0.0,,0.0,1.1201457977294922,0.077,477.896,2.3651,kmeans+dt,wine.zip-12_True_k
+12,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,3,5,0.0,,,0.0,,0.0,1.1417138576507568,0.0637,414.5509,2.1978,kmeans+dt,wine.zip-12_True_k
+12,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,30,50,0.0,,,0.0,,0.0,0.920208215713501,0.077,477.896,2.3651,kmeans+dt,wine.zip-12_True_k
+12,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,30,5,0.0,,,0.0,,0.0,1.191669464111328,0.0695,442.4094,2.3189,kmeans+dt,wine.zip-12_True_k
+12,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,3,50,0.0,,,0.0,,0.0,1.2290794849395752,0.077,477.896,2.3651,kmeans+dt,wine.zip-12_True_k
+12,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,3,5,0.0,,,0.0,,0.0,1.1870036125183103,0.0637,414.5509,2.1978,kmeans+dt,wine.zip-12_True_k

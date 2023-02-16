@@ -1,0 +1,13 @@
+n_clusters,labels_as_tree_leaves,init,n_init,max_iter,tol,verbose,random_state,copy,algorithm,criterion,splitter,min_samples_split,min_samples_leaf,min_weight_fraction_leaf,max_features,max_leaf_nodes,min_impurity_decrease,class_weight,ccp_alpha,time,silhouette,calinski_harabasz,davies_bouldin,alg,dataset
+10,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,30,50,0.0,,,0.0,,0.0,0.0967273712158203,0.1988,92.1985,1.6111,kmeans+dt,home.zip-10_True_k
+10,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,30,5,0.0,,,0.0,,0.0,0.0995345115661621,0.1512,74.0827,1.757,kmeans+dt,home.zip-10_True_k
+10,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,3,50,0.0,,,0.0,,0.0,0.1268341541290283,0.1988,92.1985,1.6111,kmeans+dt,home.zip-10_True_k
+10,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,3,5,0.0,,,0.0,,0.0,0.0983638763427734,0.1512,74.0827,1.757,kmeans+dt,home.zip-10_True_k
+10,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,30,50,0.0,,,0.0,,0.0,0.0994403362274169,0.1988,92.1985,1.6111,kmeans+dt,home.zip-10_True_k
+10,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,30,5,0.0,,,0.0,,0.0,0.1021828651428222,0.1512,74.0827,1.757,kmeans+dt,home.zip-10_True_k
+10,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,3,50,0.0,,,0.0,,0.0,0.0979955196380615,0.1988,92.1985,1.6111,kmeans+dt,home.zip-10_True_k
+10,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,3,5,0.0,,,0.0,,0.0,0.1061439514160156,0.1512,74.0827,1.757,kmeans+dt,home.zip-10_True_k
+10,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,30,50,0.0,,,0.0,,0.0,0.1075689792633056,0.1988,92.1985,1.6111,kmeans+dt,home.zip-10_True_k
+10,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,30,5,0.0,,,0.0,,0.0,0.1033270359039306,0.1512,74.0827,1.757,kmeans+dt,home.zip-10_True_k
+10,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,3,50,0.0,,,0.0,,0.0,0.0960867404937744,0.1988,92.1985,1.6111,kmeans+dt,home.zip-10_True_k
+10,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,3,5,0.0,,,0.0,,0.0,0.0986344814300537,0.1512,74.0827,1.757,kmeans+dt,home.zip-10_True_k

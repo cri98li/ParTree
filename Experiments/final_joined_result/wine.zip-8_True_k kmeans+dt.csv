@@ -1,0 +1,13 @@
+n_clusters,labels_as_tree_leaves,init,n_init,max_iter,tol,verbose,random_state,copy,algorithm,criterion,splitter,min_samples_split,min_samples_leaf,min_weight_fraction_leaf,max_features,max_leaf_nodes,min_impurity_decrease,class_weight,ccp_alpha,time,silhouette,calinski_harabasz,davies_bouldin,alg,dataset
+8,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,30,50,0.0,,,0.0,,0.0,1.1360304355621338,0.1204,721.121,2.24,kmeans+dt,wine.zip-8_True_k
+8,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,30,5,0.0,,,0.0,,0.0,1.2243602275848389,0.1204,721.121,2.24,kmeans+dt,wine.zip-8_True_k
+8,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,3,50,0.0,,,0.0,,0.0,1.2122795581817627,0.1204,721.121,2.24,kmeans+dt,wine.zip-8_True_k
+8,True,k-means++,11,100,0.0001,False,42,True,lloyd,gini,best,3,5,0.0,,,0.0,,0.0,1.0830256938934326,0.1204,721.121,2.24,kmeans+dt,wine.zip-8_True_k
+8,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,30,50,0.0,,,0.0,,0.0,1.0736095905303955,0.1204,721.121,2.24,kmeans+dt,wine.zip-8_True_k
+8,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,30,5,0.0,,,0.0,,0.0,1.2324113845825195,0.1204,721.121,2.24,kmeans+dt,wine.zip-8_True_k
+8,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,3,50,0.0,,,0.0,,0.0,1.1259698867797852,0.1204,721.121,2.24,kmeans+dt,wine.zip-8_True_k
+8,True,k-means++,11,300,0.0001,False,42,True,lloyd,gini,best,3,5,0.0,,,0.0,,0.0,1.2442643642425537,0.1204,721.121,2.24,kmeans+dt,wine.zip-8_True_k
+8,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,30,50,0.0,,,0.0,,0.0,1.1404168605804443,0.1204,721.121,2.24,kmeans+dt,wine.zip-8_True_k
+8,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,30,5,0.0,,,0.0,,0.0,1.1856818199157717,0.1204,721.121,2.24,kmeans+dt,wine.zip-8_True_k
+8,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,3,50,0.0,,,0.0,,0.0,1.2256157398223877,0.1204,721.121,2.24,kmeans+dt,wine.zip-8_True_k
+8,True,k-means++,11,500,0.0001,False,42,True,lloyd,gini,best,3,5,0.0,,,0.0,,0.0,1.117037296295166,0.1204,721.121,2.24,kmeans+dt,wine.zip-8_True_k

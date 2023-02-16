@@ -1,2 +1,7 @@
 number_clusters,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
+10,0.9233894348144532,0.5845,1026.8845,0.6472,0.5626,0.111,0.0436,0.0509,0.0581,0.0655,0.0522,0.0581,0.6318,pyc_agglomerativeClust,titanic_y.zip
+12,0.92161226272583,0.5602,854.5584,0.7338,0.5625,0.111,0.0441,0.049,0.058,0.0662,0.0516,0.058,0.6316,pyc_agglomerativeClust,titanic_y.zip
 2,0.8307404518127441,0.8073,1374.6878,0.3203,0.5331,0.0268,0.0068,0.0139,0.0152,0.0103,0.0291,0.0152,0.6909,pyc_agglomerativeClust,titanic_y.zip
+4,0.917940616607666,0.7636,979.2217,0.3844,0.5382,0.043,0.013,0.0217,0.0253,0.0196,0.0356,0.0253,0.6771,pyc_agglomerativeClust,titanic_y.zip
+6,0.9155945777893066,0.6381,1016.2502,0.5746,0.5528,0.0844,0.0307,0.0434,0.0483,0.0462,0.0505,0.0483,0.6488,pyc_agglomerativeClust,titanic_y.zip
+8,0.9426381587982178,0.6081,1261.0015,0.6608,0.5619,0.1095,0.0423,0.0518,0.0574,0.0636,0.0523,0.0574,0.632,pyc_agglomerativeClust,titanic_y.zip
