@@ -51,7 +51,7 @@ def run_CenterParTree(dataset: str, res_folder):
     parameters = [
         [2, 3, 4, 6, 8, 10, 12],  # max_depth
         #[len(np.unique(y))] if has_y else range(2, 12 + 1, 2),  # max_nbr_clusters
-        [],  # max_nbr_clusters
+        range(2, 12 + 1, 2),  # max_nbr_clusters
         [3, 30],  # range(1, 100, 30),  # min_samples_leaf
         [5, 50],  # range(2, 100, 30),  # min_samples_split
         [np.inf, 1000, 100],  # max_nbr_values
