@@ -4,7 +4,7 @@ from tqdm.auto import tqdm
 
 from ParTree.algorithms.bic_estimator import bic
 from ParTree.algorithms.data_splitter import DecisionSplit
-from ParTree.classes import ParTree
+from ParTree.classes.ParTree import ParTree
 
 
 def gini(labels):

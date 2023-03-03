@@ -5,7 +5,7 @@ from tqdm.auto import trange
 
 from ParTree.algorithms.bic_estimator import bic
 from ParTree.algorithms.data_splitter import ObliqueHouseHolderSplit
-from ParTree.classes import ParTree
+from ParTree.classes.ParTree import ParTree
 from ParTree.light_famd import MCA, PCA, FAMD
 
 
@@ -63,7 +63,7 @@ class PrincipalParTree(ParTree):
         n_components_split = min(self.n_components, len(idx_iter))
 
         if len(self.con_indexes) == 0: #all caregorical
-            transf =  MCA(n_components=n_components_split, random_state=self.random_state)
+            transf = MCA(n_components=n_components_split, random_state=self.random_state)
         elif len(self.cat_indexes) == 0: #all continous
             transf = PCA(n_components=n_components_split, random_state=self.random_state)
         else: #mixed
@@ -73,7 +73,9 @@ class PrincipalParTree(ParTree):
         typed_X = pd.DataFrame(self.X[idx_iter])
 
         for index in self.cat_indexes:
-            typed_X[index] = typed_X[index].apply(lambda x: str(x))
+            typed_X[index] = typed_X[index].apply(lambda x: f" {x}")
+
+        typed_X.columns = typed_X.columns.astype(str)
 
         y_pca = transf.fit_transform(typed_X)
 

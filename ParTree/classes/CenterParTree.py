@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import stats
-from scipy.spatial.distance import cdist
-from sklearn.metrics.pairwise import cosine_similarity
+from scipy.spatial.distance import cdist, jaccard
+from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
 from tqdm.auto import tqdm
 
 from ParTree.algorithms.bic_estimator import bic
@@ -96,7 +96,6 @@ def _mixed_metric(con_indexes, cat_indexes, u, v, metric_cat, metric_con):
         con_dist = 1 - abs(cosine_similarity(u[con_indexes].reshape(1, -1), v[con_indexes].reshape(1, -1)))
     else:
         con_dist = cdist(u[con_indexes].reshape(1, -1), v[con_indexes].reshape(1, -1), metric=metric_con)
-    # cat_dist = jaccard(u[cat_indexes], v[cat_indexes])
 
     cat_dist = 0
     if len(cat_indexes) != 0:
@@ -128,8 +127,8 @@ def _make_split_innerloop(X, con_indexes, cat_indexes, metric_cat, metric_con, i
     if len(X_a) == 0 or len(X_b) == 0:
         return [np.inf, None, None]
 
-    if np.sum(is_categorical_feature) != len(
-            is_categorical_feature):  # mixed (np.any(is_categorical_feature) and not np.all(is_categorical_feature))
+    if np.any(is_categorical_feature) and not np.all(is_categorical_feature):
+        # mixed (np.any(is_categorical_feature) and not np.all(is_categorical_feature))
         centroid_a = np.mean(X_a[:, ~is_categorical_feature], axis=0)
         centroid_b = np.mean(X_b[:, ~is_categorical_feature], axis=0)
 
@@ -159,8 +158,8 @@ def _make_split_innerloop(X, con_indexes, cat_indexes, metric_cat, metric_con, i
         centroid_a = np.mean(X_a, axis=0)
         centroid_b = np.mean(X_b, axis=0)
 
-        dist_a = cdist(X_a_sub, centroid_a.reshape(1, -1), metric=metric_con)
-        dist_b = cdist(X_b_sub, centroid_b.reshape(1, -1), metric=metric_con)
+        dist_a = cdist(X_a_sub, centroid_a.reshape(1, -1), metric="euclidean")
+        dist_b = cdist(X_b_sub, centroid_b.reshape(1, -1), metric="euclidean")
 
     mse_a = np.mean(dist_a)
     mse_b = np.mean(dist_b)

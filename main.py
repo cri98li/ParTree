@@ -3,31 +3,35 @@ import time
 import numpy as np
 import pandas as pd
 from sklearn.compose import make_column_selector, ColumnTransformer
-from sklearn.preprocessing import StandardScaler, OrdinalEncoder
+from sklearn.preprocessing import StandardScaler, OrdinalEncoder, OneHotEncoder
 
 from ParTree.algorithms.measures_utils import get_metrics_uns, get_metrics_s
+from ParTree.classes.CenterParTree import CenterParTree
 from ParTree.classes.ParTree import print_rules
 from ParTree.classes.PrincipalParTree import PrincipalParTree
 
 if __name__ == '__main__':
     #data = pd.read_csv('Experiments/datasets/real/compas-scores-two-years.zip')
-    data = pd.read_csv('Experiments/datasets/real/wdbc_y.zip')
+    data = pd.read_csv('Experiments/datasets/syntetic/2d-3c-no123_y.zip')
 
-    #cptree = CenterParTree(4, 12, 3, 5, 1000, 20, 0.1, 42, "cos", "jaccard", n_jobs=12, verbose=True)
+    print(data.columns)
+
+    cptree = CenterParTree(
+        max_depth=3,
+        max_nbr_clusters=3,
+        min_samples_leaf=3,
+        min_samples_split=3,
+        max_nbr_values=100,
+        max_nbr_values_cat=10,
+        bic_eps=0.0,
+        random_state=42,
+        metric_con="cos",
+        metric_cat="jaccard",
+        n_jobs=6,
+        verbose=True
+    )
     #cptree = ImpurityParTree(n_jobs=12)
     cptree = PrincipalParTree(2, 2, 3, 5, np.inf, np.inf, 0.0, 42, 1, False, 0)
-
-    def remove_missing_values(df):
-        for column_name, nbr_missing in df.isna().sum().to_dict().items():
-            if nbr_missing > 0:
-                if column_name in df._get_numeric_data().columns:
-                    mean = df[column_name].mean()
-                    df[column_name].fillna(mean, inplace=True)
-                else:
-                    mode = df[column_name].mode().values[0]
-                    df[column_name].fillna(mode, inplace=True)
-        return df
-
 
     def cluster_info(obj):
         n_cluster = len(np.unique(obj.labels_))
@@ -37,13 +41,15 @@ if __name__ == '__main__':
         return bic, n_cluster
 
 
-    data = remove_missing_values(data)
-
     scaler = StandardScaler()
+
+    print(data.dtypes)
 
     ct = ColumnTransformer([
         ('std_scaler', scaler, make_column_selector(dtype_include=['int', 'float'])),
-        ("cat", OrdinalEncoder(), make_column_selector(dtype_include="object"))],
+        #("cat", OrdinalEncoder(), make_column_selector(dtype_include="object")),
+        ("cat", OneHotEncoder(), make_column_selector(dtype_include="object"))
+        ],
         remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=12)
 
     data = pd.DataFrame(ct.fit_transform(data), columns=ct.get_feature_names_out())
@@ -61,7 +67,7 @@ if __name__ == '__main__':
 
     r_score, adj_rand, mut_info_score, adj_mutual_info_score, norm_mutual_info_score, homog_score, complete_score, \
         v_msr_score, fwlks_mallows_score = get_metrics_s(cptree.labels_, labels)
-    silhouette, calinski_harabasz, davies_bouldin = get_metrics_uns(X, cptree)
+    silhouette, calinski_harabasz, davies_bouldin = get_metrics_uns(X, cptree.labels_)
     bic, n_cluster = cluster_info(cptree)
 
     print(end - start)

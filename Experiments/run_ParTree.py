@@ -84,7 +84,7 @@ def run_CenterParTree(dataset: str, res_folder):
 
             ct = ColumnTransformer([
                 ('std_scaler', StandardScaler(), make_column_selector(dtype_include=['int', 'float'])),
-                ("cat", OrdinalEncoder(), make_column_selector(dtype_include="object"))],
+                ("cat", OneHotEncoder(), make_column_selector(dtype_include="object"))],
                 remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=os.cpu_count())
 
             X = ct.fit_transform(df)
