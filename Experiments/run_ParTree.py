@@ -54,8 +54,8 @@ def run_CenterParTree(dataset: str, res_folder):
         range(2, 12 + 1, 2),  # max_nbr_clusters
         [3, 30],  # range(1, 100, 30),  # min_samples_leaf
         [5, 50],  # range(2, 100, 30),  # min_samples_split
-        [np.inf, 1000, 100],  # max_nbr_values
-        [np.inf, 20, 100],  # max_nbr_values_cat
+        [np.inf, 1000, 100], #[np.inf, 1000, 100],  # max_nbr_values
+        [100, 20], #[np.inf, 20, 100],  # max_nbr_values_cat
         np.arange(.0, .3, .1),  # bic_eps
         [42],  # random_state
         ["cos"],  # metric
@@ -84,7 +84,7 @@ def run_CenterParTree(dataset: str, res_folder):
 
             ct = ColumnTransformer([
                 ('std_scaler', StandardScaler(), make_column_selector(dtype_include=['int', 'float'])),
-                ("cat", OneHotEncoder(), make_column_selector(dtype_include="object"))],
+                ("cat", OrdinalEncoder(), make_column_selector(dtype_include="object"))],
                 remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=os.cpu_count())
 
             X = ct.fit_transform(df)
@@ -101,7 +101,7 @@ def run_CenterParTree(dataset: str, res_folder):
             pd.DataFrame([row], columns=colNames).to_csv(res_folder+filename, index=False)
         except Exception as e:
             print(f"Errore dataset {dataset}, parametri {'_'.join([str(x) for x in els])+'.csv'}")
-            raise e
+            #raise e
 
 
 def run_ImpurityParTree(dataset: str, res_folder):
@@ -122,7 +122,7 @@ def run_ImpurityParTree(dataset: str, res_folder):
         [3, 30],  # range(1, 100, 30),  # min_samples_leaf
         [5, 50],  # range(2, 100, 30),  # min_samples_split
         [np.inf, 1000, 100],  # max_nbr_values
-        [np.inf, 20, 100],  # max_nbr_values_cat
+        [20, 100],  # max_nbr_values_cat
         np.arange(.0, .3, .1),  # bic_eps
         [42],  # random_state
         ["gini", "entropy", "me"],  # criteria_clf
@@ -168,7 +168,7 @@ def run_ImpurityParTree(dataset: str, res_folder):
             pd.DataFrame([row], columns=colNames).to_csv(res_folder+filename, index=False)
         except Exception as e:
             print(f"Errore dataset {dataset}, parametri {'_'.join([str(x) for x in els])+'.csv'}")
-            raise e
+            #raise e
 
 
 def run_PrincipalParTree(dataset:str, res_folder):
@@ -188,12 +188,12 @@ def run_PrincipalParTree(dataset:str, res_folder):
                             "max_oblique_features"]
 
         parameters = [
-            [2, 3, 4, 6, 8, 10, 12],  # max_depth
+            [2, 3, 4, 6, 8],  # max_depth
             range(2, 12 + 1, 2),  # max_nbr_clusters
             [3, 30],  # range(1, 100, 30),  # min_samples_leaf
             [5, 50],  # range(2, 100, 30),  # min_samples_split
             [np.inf, 1000, 100],  # max_nbr_values
-            [np.inf, 20, 100],  # max_nbr_values_cat
+            [100, 20],  # max_nbr_values_cat
             np.arange(.0, .3, .1),  # bic_eps
             [42],  # random_state
             [1, 2, 3],  # n_components
@@ -240,7 +240,7 @@ def run_PrincipalParTree(dataset:str, res_folder):
                 pd.DataFrame([row], columns=colNames).to_csv(res_folder + filename, index=False)
             except Exception as e:
                 print(f"Errore dataset {dataset}, parametri {'_'.join([str(x) for x in els]) + '.csv'}")
-                raise e
+                #raise e
 
 
 

@@ -9,6 +9,7 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 from ParTree.algorithms.bic_estimator import bic
+from ParTree.algorithms.data_preparation import prepare_data
 from ParTree.algorithms.data_splitter import DecisionSplit
 from ParTree.classes.ParTree_node import ParTree_node
 
@@ -18,23 +19,6 @@ global global_X
 def init_pool(X):
     global global_X
     global_X = X
-
-
-def _prepare_data(X, max_nbr_values, max_nbr_values_cat):
-    feature_values = dict()
-    n_features = X.shape[1]
-    is_categorical_feature = np.full_like(np.zeros(n_features, dtype=bool), False)
-    for feature in range(n_features):
-        values = np.unique(X[:, feature])
-        if len(values) > max_nbr_values:
-            _, vals = np.histogram(values, bins=max_nbr_values)
-            values = [(vals[i] + vals[i + 1]) / 2 for i in range(len(vals) - 1)]
-        feature_values[feature] = values
-
-        if len(values) <= max_nbr_values_cat:
-            is_categorical_feature[feature] = True
-
-    return feature_values, is_categorical_feature
 
 
 class ParTree(ABC):
@@ -61,7 +45,6 @@ class ParTree(ABC):
 
         :param max_nbr_clusters:
             The maximum number of clusters to form as well as the number of centroids to generate.
-            TODO: controllare se è davvero il massimo
 
         :param min_samples_leaf:
             The minimum number of samples required to be at a leaf node. A split point at any depth will only be
@@ -149,8 +132,9 @@ class ParTree(ABC):
 
         nbr_curr_clusters = 0
 
-        self.feature_values, self.is_categorical_feature = _prepare_data(X, self.max_nbr_values,
+        self.feature_values, self.is_categorical_feature, X = prepare_data(X, self.max_nbr_values,
                                                                          self.max_nbr_values_cat)
+        self.X = X
 
         self.con_indexes = np.array([i for i in range(n_features) if not self.is_categorical_feature[i]])
         self.cat_indexes = np.array([i for i in range(n_features) if self.is_categorical_feature[i]])
@@ -200,7 +184,6 @@ class ParTree(ABC):
             node.bic = bic_parent
             node.is_oblique = is_oblique
 
-            # TODO: chiarire q-score
             heapq.heappush(self.queue, (-len(idx_all_l) + 0.00001 * bic_l, (next(tiebreaker), idx_all_l, node_depth + 1, node_l)))
             heapq.heappush(self.queue, (-len(idx_all_r) + 0.00001 * bic_r, (next(tiebreaker), idx_all_r, node_depth + 1, node_r)))
 

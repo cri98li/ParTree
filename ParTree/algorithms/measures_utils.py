@@ -1,5 +1,7 @@
 import numpy as np
-from sklearn.metrics import *
+from sklearn.metrics import rand_score, adjusted_rand_score, mutual_info_score, normalized_mutual_info_score, \
+    adjusted_mutual_info_score, homogeneity_score, fowlkes_mallows_score, v_measure_score, completeness_score, \
+    silhouette_score, calinski_harabasz_score, davies_bouldin_score
 
 
 def get_metrics_s(clust_id, y):

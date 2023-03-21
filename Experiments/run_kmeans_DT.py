@@ -12,6 +12,8 @@ from sklearn.compose import ColumnTransformer, make_column_selector
 from sklearn.tree import DecisionTreeClassifier
 from tqdm.auto import tqdm
 
+from ParTree.algorithms.data_preparation import prepare_data
+
 
 class KMeansTree():
 
@@ -83,6 +85,8 @@ from sklearn.metrics import silhouette_score, v_measure_score, normalized_mutual
 
 from sklearn.cluster import KMeans
 
+max_nbr_values = [np.inf, 1000, 100]  # max_nbr_values
+max_nbr_values_cat = [20, 100]  # max_nbr_values_cat
 
 def run(datasets: str, destination_folder: str):
     runs = [
@@ -136,7 +140,7 @@ def run_kmeansPartree(dataset: str, res_folder):
     hyperparams_name = ["n_clusters", "labels_as_tree_leaves", "init", "n_init", "max_iter", "tol",
                         "verbose", "random_state", "copy", "algorithm", "criterion", "splitter", "min_samples_split",
                         "min_samples_leaf", "min_weight_fraction_leaf", "max_features", "max_leaf_nodes",
-                        "min_impurity_decrease", "class_weight", "ccp_alpha"]
+                        "min_impurity_decrease", "class_weight", "ccp_alpha", "max_nbr_values", "max_nbr_values_cat"]
 
     parameters = [
         range(2, 12 + 1, 2),  # n_clusters
@@ -159,6 +163,8 @@ def run_kmeansPartree(dataset: str, res_folder):
         [.0],  # min_impurity_decrease
         [None],  # class_weight
         [.0],  # ccp_alpha
+        max_nbr_values,
+        max_nbr_values_cat
     ]
 
     els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
@@ -187,6 +193,7 @@ def run_kmeansPartree(dataset: str, res_folder):
                 remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=os.cpu_count())
 
             X = ct.fit_transform(df)
+            _, _, X = prepare_data(X, els[-2], els[-1])
 
             start = time.time()
             cpt.fit(X)

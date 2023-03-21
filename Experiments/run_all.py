@@ -9,7 +9,7 @@ import run_classicClustering as rcc
 modules = [
     rcc,
     rkd,
-    rpt
+    #rpt
 ]
 
 
@@ -20,15 +20,21 @@ def read_status():
 
     d = dict()
 
-    with open(filename) as f:
-        k, v = f.readline().split(":")
-        d[k] = v
+
 
     return d
 
 
 if __name__ == '__main__':
     datasets = [y for x in os.walk("datasets/") for y in glob(os.path.join(x[0], '*.zip'))]
+    daescludere = ["adult", "churn", "compas", "fico", "german"]
+    for el in daescludere:
+        for i in range(len(datasets)):
+            if el in datasets[i]:
+                datasets.remove(datasets[i])
+                break
+
+    print(datasets)
 
     metadata = read_status()
 

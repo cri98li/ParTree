@@ -20,6 +20,11 @@ from tqdm.auto import tqdm
 
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder
 
+from ParTree.algorithms.data_preparation import prepare_data
+
+
+max_nbr_values = [np.inf, 1000, 100]  # max_nbr_values
+max_nbr_values_cat = [20, 100]  # max_nbr_values_cat
 
 def run(datasets: str, destination_folder: str):
     runs = [
@@ -55,10 +60,12 @@ def run_pyclust_agglomerativeClust(dataset: str, res_folder):
         y = df[df.columns[-1]]
         df = df.drop(columns=[df.columns[-1]])
 
-    hyperparams_name = ["number_clusters"]
+    hyperparams_name = ["number_clusters", "max_nbr_values", "max_nbr_values_cat"]
 
     parameters = [
         range(2, 12 + 1, 2),  # number_clusters
+        max_nbr_values,  # max_nbr_values
+        max_nbr_values_cat,  # max_nbr_values_cat
     ]
 
     els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
@@ -84,6 +91,9 @@ def run_pyclust_agglomerativeClust(dataset: str, res_folder):
                 remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=os.cpu_count())
 
             X = ct.fit_transform(df)
+
+            _, _, X = prepare_data(X, els[-2], els[-1])
+
             cpt = agglomerative(X, els[0])
 
             start = time.time()
@@ -114,11 +124,13 @@ def run_pyclust_xmeans(dataset: str, res_folder):
         y = df[df.columns[-1]]
         df = df.drop(columns=[df.columns[-1]])
 
-    hyperparams_name = ["amount_initial_centers", "kmax"]
+    hyperparams_name = ["amount_initial_centers", "kmax", "max_nbr_values", "max_nbr_values_cat"]
 
     parameters = [
         range(2, 12 + 1, 2),  # number_clusters
         range(2, 12 * 2 + 1, 2 * 2),  # kmax
+        max_nbr_values,
+        max_nbr_values_cat
     ]
 
     els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
@@ -144,6 +156,7 @@ def run_pyclust_xmeans(dataset: str, res_folder):
                 remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=os.cpu_count())
 
             X = ct.fit_transform(df)
+            _, _, X = prepare_data(X, els[-2], els[-1])
 
             initial_centers = kmeans_plusplus_initializer(X, els[0]).initialize()
             cpt = xmeans(X, initial_centers, kmax=els[1])
@@ -177,7 +190,7 @@ def run_sklearn_kmeans(dataset: str, res_folder):
         df = df.drop(columns=[df.columns[-1]])
 
     hyperparams_name = ["n_clusters", "init", "n_init", "max_iter", "tol",
-                        "verbose", "random_state", "copy", "algorithm"]
+                        "verbose", "random_state", "copy", "algorithm", "max_nbr_values", "max_nbr_values_cat"]
 
     parameters = [
         range(2, 12 + 1, 2),  # n_clusters
@@ -189,6 +202,8 @@ def run_sklearn_kmeans(dataset: str, res_folder):
         [42],  # random_state
         [True],  # copy,
         ["lloyd"],  # algorithm
+        max_nbr_values,
+        max_nbr_values_cat
     ]
 
     els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
@@ -214,6 +229,7 @@ def run_sklearn_kmeans(dataset: str, res_folder):
                 remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=os.cpu_count())
 
             X = ct.fit_transform(df)
+            _, _, X = prepare_data(X, els[-2], els[-1])
 
             cpt = KMeans(els[0], init=els[1], n_init=els[2], max_iter=els[3], tol=els[4], verbose=els[5],
                          random_state=els[6], copy_x=els[7], algorithm=els[8])
@@ -242,7 +258,7 @@ def run_sklearn_bis_kmeans(dataset: str, res_folder):
         df = df.drop(columns=[df.columns[-1]])
 
     hyperparams_name = ["n_clusters", "init", "n_init", "max_iter", "tol",
-                        "verbose", "random_state", "copy", "algorithm", "bisecting_strategy"]
+                        "verbose", "random_state", "copy", "algorithm", "bisecting_strategy", "max_nbr_values", "max_nbr_values_cat"]
 
     parameters = [
         range(2, 12 + 1, 2),  # n_clusters
@@ -255,6 +271,8 @@ def run_sklearn_bis_kmeans(dataset: str, res_folder):
         [True],  # copy,
         ["lloyd"],  # algorithm
         ["biggest_inertia", "largest_cluster"], #bisecting_strategy
+        max_nbr_values,
+        max_nbr_values_cat
     ]
 
     els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
@@ -280,6 +298,7 @@ def run_sklearn_bis_kmeans(dataset: str, res_folder):
                 remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=os.cpu_count())
 
             X = ct.fit_transform(df)
+            _, _, X = prepare_data(X, els[-2], els[-1])
 
             cpt = BisectingKMeans(els[0], init=els[1], n_init=els[2], max_iter=els[3], tol=els[4], verbose=els[5],
                                   random_state=els[6], copy_x=els[7], algorithm=els[8], bisecting_strategy=els[9])
@@ -306,7 +325,7 @@ def run_kmodes(dataset: str, res_folder):
         y = df[df.columns[-1]]
         df = df.drop(columns=[df.columns[-1]])
 
-    hyperparams_name = ["n_clusters", "max_iter", "init", "n_init", "verbose", "random_state", "n_jobs"]
+    hyperparams_name = ["n_clusters", "max_iter", "init", "n_init", "verbose", "random_state", "n_jobs", "max_nbr_values", "max_nbr_values_cat"]
 
     parameters = [
         range(2, 12 + 1, 2),  # n_clusters
@@ -316,6 +335,8 @@ def run_kmodes(dataset: str, res_folder):
         [False],  # verbose
         [42],  # random_state
         [psutil.cpu_count(logical=False)],  # n_jobs,
+        max_nbr_values,
+        max_nbr_values_cat
     ]
 
     els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
@@ -341,6 +362,7 @@ def run_kmodes(dataset: str, res_folder):
                 remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=os.cpu_count())
 
             X = ct.fit_transform(df)
+            _, _, X = prepare_data(X, els[-2], els[-1])
 
             cpt = KModes(n_clusters=els[0], max_iter=els[1], init=els[2], n_init=els[3], verbose=els[4],
                          random_state=els[5], n_jobs=els[6])
@@ -367,7 +389,7 @@ def run_sklearn_dbscan(dataset: str, res_folder):
         y = df[df.columns[-1]]
         df = df.drop(columns=[df.columns[-1]])
 
-    hyperparams_name = ["eps", "min_samples", "metric", "algorithm", "n_jobs"]
+    hyperparams_name = ["eps", "min_samples", "metric", "algorithm", "n_jobs", "max_nbr_values", "max_nbr_values_cat"]
 
     parameters = [
         [.1, .25, .5, .75, 1.],  # eps
@@ -375,6 +397,8 @@ def run_sklearn_dbscan(dataset: str, res_folder):
         ["euclidean", "cosine", "correlation"],  # metric
         ["auto"],  # algorithm
         [psutil.cpu_count(logical=False)],  # n_jobs,
+        max_nbr_values,
+        max_nbr_values_cat
     ]
 
     els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
@@ -400,6 +424,7 @@ def run_sklearn_dbscan(dataset: str, res_folder):
                 remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=os.cpu_count())
 
             X = ct.fit_transform(df)
+            _, _, X = prepare_data(X, els[-2], els[-1])
 
             cpt = DBSCAN(eps=els[0], min_samples=els[1], metric=els[2], algorithm=els[3], n_jobs=els[4])
 
@@ -425,7 +450,7 @@ def run_sklearn_optics(dataset: str, res_folder):
         y = df[df.columns[-1]]
         df = df.drop(columns=[df.columns[-1]])
 
-    hyperparams_name = ["min_samples", "max_eps", "metric", "algorithm", "n_jobs"]
+    hyperparams_name = ["min_samples", "max_eps", "metric", "algorithm", "n_jobs", "max_nbr_values", "max_nbr_values_cat"]
 
     parameters = [
         [2, 3, 5, 10, 20],  # min_samples
@@ -433,6 +458,8 @@ def run_sklearn_optics(dataset: str, res_folder):
         ["euclidean", "cosine", "correlation"],  # metric
         ["auto"],  # algorithm
         [psutil.cpu_count(logical=False)],  # n_jobs,
+        max_nbr_values,
+        max_nbr_values_cat
     ]
 
     els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
@@ -458,6 +485,7 @@ def run_sklearn_optics(dataset: str, res_folder):
                 remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=os.cpu_count())
 
             X = ct.fit_transform(df)
+            _, _, X = prepare_data(X, els[-2], els[-1])
 
             cpt = OPTICS(min_samples=els[0], max_eps=els[1], metric=els[2], algorithm=els[3], n_jobs=els[4])
 
@@ -483,12 +511,14 @@ def run_sklearn_agglomerativeClust(dataset: str, res_folder):
         y = df[df.columns[-1]]
         df = df.drop(columns=[df.columns[-1]])
 
-    hyperparams_name = ["n_clusters", "metric", "linkage"]
+    hyperparams_name = ["n_clusters", "metric", "linkage", "max_nbr_values", "max_nbr_values_cat"]
 
     parameters = [
         range(2, 12 + 1, 2),  # n_clusters
         ["euclidean", "cosine", "correlation"], #metric
         ["ward", "complete", "average", "single"], #linkage: single->min, complete->max
+        max_nbr_values,
+        max_nbr_values_cat
     ]
 
     els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
@@ -517,6 +547,7 @@ def run_sklearn_agglomerativeClust(dataset: str, res_folder):
                 remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=os.cpu_count())
 
             X = ct.fit_transform(df)
+            _, _, X = prepare_data(X, els[-2], els[-1])
 
             cpt = AgglomerativeClustering(n_clusters=els[0], metric=els[1], linkage=els[2])
 
@@ -543,12 +574,14 @@ def run_sklearn_birch(dataset: str, res_folder):
         y = df[df.columns[-1]]
         df = df.drop(columns=[df.columns[-1]])
 
-    hyperparams_name = ["threshold", "branching_factor", "n_clusters"]
+    hyperparams_name = ["threshold", "branching_factor", "n_clusters", "max_nbr_values", "max_nbr_values_cat"]
 
     parameters = [
         [.5], #threshold
         [50], #branching_factor
         range(2, 12 + 1, 2),  # n_clusters
+        max_nbr_values,
+        max_nbr_values_cat
     ]
 
     els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
@@ -574,6 +607,7 @@ def run_sklearn_birch(dataset: str, res_folder):
                 remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=os.cpu_count())
 
             X = ct.fit_transform(df)
+            _, _, X = prepare_data(X, els[-2], els[-1])
 
             cpt = Birch(threshold=els[0], branching_factor=els[1], n_clusters=els[2])
 
