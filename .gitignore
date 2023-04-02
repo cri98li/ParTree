@@ -127,3 +127,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+#jetbrains
+.idea/
+/commands.txt
+
+Experiments/results_from_servers/*
+Experiments/results.tar
+Experiments/results_from_servers.zip

@@ -1,0 +1,2 @@
+min_nr_instances,min_y,min_rd,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
+2,1,10,2837.967403411865,0.0041,3.4979,31.0154,0.5409,0.0803,0.0371,0.0571,0.0573,0.0538,0.0613,0.0573,0.5811,CLTree,compas-scores-two-years_y.zip

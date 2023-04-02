@@ -1,0 +1,2 @@
+min_nr_instances,min_y,min_rd,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
+2,1,10,72.02801537513733,-0.1145,1.0606,15.2975,0.6025,0.055,0.2316,0.1397,0.1511,0.1671,0.1378,0.1511,0.3316,CLTree,vehicle_y.zip

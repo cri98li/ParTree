@@ -1,0 +1,16 @@
+n_clusters,init,n_init,max_iter,tol,verbose,random_state,copy,algorithm,max_nbr_values,max_nbr_values_cat,time,silhouette,calinski_harabasz,davies_bouldin,alg,dataset
+2,k-means++,11,100,0.0001,False,42,True,lloyd,1000.0,100,1.1879324913024902,0.205,1755.0742,1.8127,skl_kmeans,wine.zip-2_k
+2,k-means++,11,100,0.0001,False,42,True,lloyd,1000.0,20,1.0832700729370115,0.205,1755.0742,1.8127,skl_kmeans,wine.zip-2_k
+2,k-means++,11,100,0.0001,False,42,True,lloyd,20.0,20,1.2272322177886963,0.2048,1754.1863,1.8133,skl_kmeans,wine.zip-2_k
+2,k-means++,11,100,0.0001,False,42,True,lloyd,inf,100,1.32915997505188,0.205,1755.0742,1.8127,skl_kmeans,wine.zip-2_k
+2,k-means++,11,100,0.0001,False,42,True,lloyd,inf,20,1.0947895050048828,0.205,1755.0742,1.8127,skl_kmeans,wine.zip-2_k
+2,k-means++,11,300,0.0001,False,42,True,lloyd,1000.0,100,1.203011989593506,0.205,1755.0742,1.8127,skl_kmeans,wine.zip-2_k
+2,k-means++,11,300,0.0001,False,42,True,lloyd,1000.0,20,1.2246055603027344,0.205,1755.0742,1.8127,skl_kmeans,wine.zip-2_k
+2,k-means++,11,300,0.0001,False,42,True,lloyd,20.0,20,1.2214372158050537,0.2048,1754.1863,1.8133,skl_kmeans,wine.zip-2_k
+2,k-means++,11,300,0.0001,False,42,True,lloyd,inf,100,1.308539628982544,0.205,1755.0742,1.8127,skl_kmeans,wine.zip-2_k
+2,k-means++,11,300,0.0001,False,42,True,lloyd,inf,20,1.2230589389801023,0.205,1755.0742,1.8127,skl_kmeans,wine.zip-2_k
+2,k-means++,11,500,0.0001,False,42,True,lloyd,1000.0,100,1.2266573905944824,0.205,1755.0742,1.8127,skl_kmeans,wine.zip-2_k
+2,k-means++,11,500,0.0001,False,42,True,lloyd,1000.0,20,1.1309430599212646,0.205,1755.0742,1.8127,skl_kmeans,wine.zip-2_k
+2,k-means++,11,500,0.0001,False,42,True,lloyd,20.0,20,1.2979259490966797,0.2048,1754.1863,1.8133,skl_kmeans,wine.zip-2_k
+2,k-means++,11,500,0.0001,False,42,True,lloyd,inf,100,1.2176628112792969,0.205,1755.0742,1.8127,skl_kmeans,wine.zip-2_k
+2,k-means++,11,500,0.0001,False,42,True,lloyd,inf,20,1.2769765853881836,0.205,1755.0742,1.8127,skl_kmeans,wine.zip-2_k

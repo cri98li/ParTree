@@ -2,9 +2,9 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path
 
-__author__ = "PackageOwner"
+__author__ = "cri98li"
 __license__ = "BSD-2-Clause"
-__email__ = "email"
+__email__ = "cri98li@gmail.com"
 
 
 here = path.abspath(path.dirname(__file__))
@@ -18,13 +18,13 @@ with open(path.join(here, "requirements.txt"), encoding="utf-8") as f:
 
 
 setup(
-    name="package_name",
+    name="ParTree",
     version="0.0.1",
     license="BSD-Clause-2",
     description="Package description",
-    url="https://github.com/USERNAME/project",
-    author="Author Name",
-    author_email="email",
+    url="https://github.com/cri98li/ParTree",
+    author="Cristiano Landi",
+    author_email="cri98li@gmail.com",
     classifiers=[
         # How mature is this project? Common values are
         #   3 - Alpha
@@ -54,8 +54,8 @@ setup(
             "*.test.*",
             "test.*",
             "test",
-            "package_name.test",
-            "package_name.test.*",
+            "ParTree.test",
+            "ParTree.test.*",
         ]
     ),
 )
