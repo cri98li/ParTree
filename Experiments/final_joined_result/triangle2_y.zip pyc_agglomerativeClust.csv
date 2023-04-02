@@ -1,7 +1,0 @@
-number_clusters,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
-10,0.4507927894592285,0.4067,1221.4942,0.848,0.874,0.6688,1.1943,0.7724,0.7745,0.9332,0.662,0.7745,0.7632,pyc_agglomerativeClust,triangle2_y.zip
-12,0.4492230415344238,0.3764,1204.1062,0.8326,0.882,0.6862,1.2365,0.7806,0.783,0.9661,0.6582,0.783,0.7786,pyc_agglomerativeClust,triangle2_y.zip
-2,0.4506139755249023,0.3838,618.041,1.1259,0.715,0.4328,0.5228,0.531,0.5318,0.4085,0.7615,0.5318,0.6685,pyc_agglomerativeClust,triangle2_y.zip
-4,0.4496071338653564,0.595,1883.6508,0.5175,0.9266,0.8242,1.1231,0.8747,0.8751,0.8775,0.8727,0.8751,0.8764,pyc_agglomerativeClust,triangle2_y.zip
-6,0.4502317905426025,0.4443,1604.5964,0.6757,0.9363,0.8428,1.1943,0.8736,0.8743,0.9332,0.8224,0.8743,0.8886,pyc_agglomerativeClust,triangle2_y.zip
-8,0.4936590194702148,0.3507,1200.8198,0.9023,0.9243,0.811,1.1943,0.8371,0.8384,0.9332,0.7611,0.8384,0.8659,pyc_agglomerativeClust,triangle2_y.zip

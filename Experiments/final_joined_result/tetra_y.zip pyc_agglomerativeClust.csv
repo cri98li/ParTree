@@ -1,7 +1,0 @@
-number_clusters,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
-10,0.0399210453033447,0.0349,151.2189,1.201,0.9742,0.9284,1.3863,0.9233,0.9252,1.0,0.8608,0.9252,0.9466,pyc_agglomerativeClust,tetra_y.zip
-12,0.039726972579956,-0.0055,131.1085,1.1977,0.9582,0.8814,1.3863,0.8844,0.8879,1.0,0.7983,0.8879,0.912,pyc_agglomerativeClust,tetra_y.zip
-2,0.0394983291625976,0.271,135.8037,1.1941,0.6241,0.3317,0.5623,0.5755,0.5772,0.4056,1.0,0.5772,0.6305,pyc_agglomerativeClust,tetra_y.zip
-4,0.0398774147033691,0.5058,418.4532,0.664,1.0,1.0,1.3863,1.0,1.0,1.0,1.0,1.0,1.0,pyc_agglomerativeClust,tetra_y.zip
-6,0.0397305488586425,0.2751,254.2021,1.0253,0.9951,0.9867,1.3863,0.9824,0.9826,1.0,0.9658,0.9826,0.9901,pyc_agglomerativeClust,tetra_y.zip
-8,0.0394985675811767,0.0726,183.8616,1.2059,0.9902,0.9733,1.3863,0.9651,0.9658,1.0,0.934,0.9658,0.98,pyc_agglomerativeClust,tetra_y.zip

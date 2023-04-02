@@ -1,7 +1,0 @@
-number_clusters,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
-10,3.517098426818848,0.4541,2851.9009,0.793,0.7981,0.4211,1.346,0.7328,0.7345,0.9444,0.601,0.7345,0.5818,pyc_agglomerativeClust,cure-t1-2000n-2D_y.zip
-12,3.518256425857544,0.4187,2994.8733,0.7682,0.7904,0.3889,1.397,0.7295,0.7315,0.9802,0.5834,0.7315,0.5591,pyc_agglomerativeClust,cure-t1-2000n-2D_y.zip
-2,3.558483600616455,0.4002,1264.0737,1.1053,0.7601,0.5364,0.6474,0.6243,0.6247,0.4543,1.0,0.6247,0.7481,pyc_agglomerativeClust,cure-t1-2000n-2D_y.zip
-4,3.547454357147217,0.3628,1283.8228,1.0292,0.7728,0.4583,0.9677,0.7079,0.7087,0.679,0.7411,0.7087,0.6204,pyc_agglomerativeClust,cure-t1-2000n-2D_y.zip
-6,3.5220377445220947,0.475,2103.8761,0.735,0.812,0.5028,1.2132,0.7686,0.7696,0.8512,0.7023,0.7696,0.6366,pyc_agglomerativeClust,cure-t1-2000n-2D_y.zip
-8,3.555774450302124,0.4922,2933.2127,0.6449,0.8161,0.488,1.3273,0.7698,0.771,0.9313,0.6577,0.771,0.6314,pyc_agglomerativeClust,cure-t1-2000n-2D_y.zip

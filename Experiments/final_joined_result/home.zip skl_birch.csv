@@ -1,7 +1,0 @@
-threshold,branching_factor,n_clusters,time,silhouette,calinski_harabasz,davies_bouldin,alg,dataset
-0.5,50,10,0.018118143081665,0.2651,138.2914,1.1848,skl_birch,home.zip
-0.5,50,12,0.0183496475219726,0.2665,121.6346,1.0741,skl_birch,home.zip
-0.5,50,2,0.0180621147155761,0.6047,119.1602,0.8167,skl_birch,home.zip
-0.5,50,4,0.0178220272064209,0.2691,150.694,1.2761,skl_birch,home.zip
-0.5,50,6,0.0180277824401855,0.2722,144.0542,1.141,skl_birch,home.zip
-0.5,50,8,0.0193281173706054,0.2682,146.9335,1.1458,skl_birch,home.zip

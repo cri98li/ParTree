@@ -1,4 +1,0 @@
-n_clusters,init,n_init,max_iter,tol,verbose,random_state,copy,algorithm,time,silhouette,calinski_harabasz,davies_bouldin,alg,dataset
-12,k-means++,11,100,0.0001,False,42,True,lloyd,0.1002430915832519,0.3,168.3478,1.0375,skl_kmeans,home.zip-12_k
-12,k-means++,11,300,0.0001,False,42,True,lloyd,0.1029469966888427,0.3,168.3478,1.0375,skl_kmeans,home.zip-12_k
-12,k-means++,11,500,0.0001,False,42,True,lloyd,0.1040639877319336,0.3,168.3478,1.0375,skl_kmeans,home.zip-12_k

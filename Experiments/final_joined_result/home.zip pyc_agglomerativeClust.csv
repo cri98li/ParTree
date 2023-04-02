@@ -1,7 +1,0 @@
-number_clusters,time,silhouette,calinski_harabasz,davies_bouldin,alg,dataset
-10,0.1250150203704834,0.1895,40.5875,0.9785,pyc_agglomerativeClust,home.zip
-12,0.1254501342773437,0.1835,33.7182,0.8662,pyc_agglomerativeClust,home.zip
-2,0.1328752040863037,0.623,21.9557,0.5146,pyc_agglomerativeClust,home.zip
-4,0.1277587413787841,0.2885,48.1625,1.5614,pyc_agglomerativeClust,home.zip
-6,0.1259245872497558,0.2721,34.1425,1.2958,pyc_agglomerativeClust,home.zip
-8,0.1277658939361572,0.1957,33.7341,1.1178,pyc_agglomerativeClust,home.zip

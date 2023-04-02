@@ -1,8 +1,0 @@
-number_clusters,time,silhouette,calinski_harabasz,davies_bouldin,r_score,adj_rand,mut_info_score,adj_mutual_info_score,norm_mutual_info_score,homog_score,complete_score,v_msr_score,fwlks_mallows_score,alg,dataset
-10,0.2251408100128173,0.298,857.4612,0.7855,0.8579,0.5205,1.4379,0.7495,0.7543,0.8484,0.6789,0.7543,0.6163,pyc_agglomerativeClust,aggregation_y.zip
-12,0.2267782688140869,0.2707,819.7585,0.9163,0.8556,0.4891,1.5042,0.7504,0.7561,0.8876,0.6585,0.7561,0.5939,pyc_agglomerativeClust,aggregation_y.zip
-2,0.226470947265625,0.2333,246.7757,1.5889,0.5443,0.1208,0.3181,0.2678,0.2702,0.1877,0.482,0.2702,0.4317,pyc_agglomerativeClust,aggregation_y.zip
-4,0.2257914543151855,0.2034,255.9364,1.308,0.7207,0.3173,0.7711,0.5288,0.5326,0.455,0.6422,0.5326,0.5105,pyc_agglomerativeClust,aggregation_y.zip
-6,0.2260184288024902,0.1676,322.724,0.9361,0.7665,0.3821,1.0212,0.6332,0.6378,0.6026,0.6774,0.6378,0.5391,pyc_agglomerativeClust,aggregation_y.zip
-7,0.227475881576538,0.225,463.7423,0.9082,0.7918,0.3833,1.109,0.6401,0.6452,0.6544,0.6362,0.6452,0.5159,pyc_agglomerativeClust,aggregation_y.zip
-8,0.2239158153533935,0.1568,438.7404,0.8354,0.7966,0.3927,1.1669,0.6621,0.6676,0.6885,0.6479,0.6676,0.5218,pyc_agglomerativeClust,aggregation_y.zip
