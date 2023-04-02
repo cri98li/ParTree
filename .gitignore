@@ -134,3 +134,4 @@ dmypy.json
 
 Experiments/results_from_servers/*
 Experiments/results.tar
+Experiments/results_from_servers.zip
