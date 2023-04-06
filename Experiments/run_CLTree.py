@@ -19,7 +19,7 @@ def run(datasets: str, destination_folder: str):
 
     datasets_bar = tqdm(datasets, position=0, leave=False)
     for dataset in datasets_bar:
-        if "syntetic" not in dataset:
+        if "synthetic" not in dataset:
             continue
         dataset_name = dataset.split('\\')[-1].split('/')[-1]
         datasets_bar.set_description(f"Dataset name: {dataset_name}")
