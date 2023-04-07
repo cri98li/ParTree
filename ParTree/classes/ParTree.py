@@ -29,7 +29,6 @@ class ParTree(ABC):
             max_nbr_clusters: int = 10,
             min_samples_leaf: int = 3,
             min_samples_split: int = 5,
-            max_nbr_values: Union[int, float] = np.inf,
             max_nbr_values_cat: Union[int, float] = np.inf,
             bic_eps: float = 0.0,
             random_state: int = None,
@@ -78,7 +77,7 @@ class ParTree(ABC):
         self.max_nbr_clusters = max_nbr_clusters
         self.min_samples_leaf = min_samples_leaf
         self.min_samples_split = min_samples_split
-        self.max_nbr_values = max_nbr_values
+        self.max_nbr_values = np.inf
         self.max_nbr_values_cat = max_nbr_values_cat
         self.bic_eps = bic_eps
         self.random_state = random_state

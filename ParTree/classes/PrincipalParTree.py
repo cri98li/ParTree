@@ -16,7 +16,6 @@ class PrincipalParTree(ParTree):
             max_nbr_clusters=10,
             min_samples_leaf=3,
             min_samples_split=5,
-            max_nbr_values=np.inf,
             max_nbr_values_cat=np.inf,
             bic_eps=0.0,
             random_state=None,
@@ -42,13 +41,11 @@ class PrincipalParTree(ParTree):
             max_nbr_clusters,
             min_samples_leaf,
             min_samples_split,
-            max_nbr_values,
             max_nbr_values_cat,
             bic_eps,
             random_state,
             n_jobs,
             verbose
-
         )
         self.n_components = n_components
         self.oblique_splits = oblique_splits
