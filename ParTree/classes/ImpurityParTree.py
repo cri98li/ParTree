@@ -88,12 +88,11 @@ class ImpurityParTree(ParTree):
             max_nbr_clusters=10,
             min_samples_leaf=3,
             min_samples_split=5,
-            max_nbr_values=100,
             max_nbr_values_cat=10,
             bic_eps=0.0,
             random_state=None,
             criteria_clf="entropy",
-            criteria_reg="r2",
+            criteria_reg="mape",
             agg_fun=np.mean,
             n_jobs=1,
             verbose = False
@@ -116,7 +115,6 @@ class ImpurityParTree(ParTree):
             max_nbr_clusters,
             min_samples_leaf,
             min_samples_split,
-            max_nbr_values,
             max_nbr_values_cat,
             bic_eps,
             random_state,
@@ -125,7 +123,15 @@ class ImpurityParTree(ParTree):
         )
         self.criteria_clf = criteria_clf
         self.criteria_reg = criteria_reg
-        self.agg_fun = agg_fun
+        if type(agg_fun) == str:
+            if agg_fun == "mean":
+                self.agg_fun = np.mean
+            elif agg_fun == "min":
+                self.agg_fun = np.min
+            elif agg_fun == "max":
+                self.agg_fun = np.max
+        else:
+            self.agg_fun = agg_fun
 
     def _make_split(self, idx_iter):
         n_features = self.X.shape[1]

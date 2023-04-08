@@ -64,7 +64,7 @@ def run_CenterParTree(dataset: str, res_folder):
                        + dataset.split("/")[-1].split("\\")[-1]+"-" \
                        + ("_".join([str(x) for x in els])+".")
 
-            if os.path.exists(res_folder+filename):
+            if os.path.exists(res_folder+filename+"csv"):
                 continue
 
             cpt = CenterParTree(els[0], els[1], els[2], els[3], els[4], els[5], els[6], els[7], els[8],
@@ -107,7 +107,7 @@ def run_ImpurityParTree(dataset: str, res_folder):
     df = pd.read_csv(dataset, index_col=None)
 
     hyperparams_name = ["max_depth", "max_nbr_clusters", "min_samples_leaf", "min_samples_split",
-                        "max_nbr_values_cat", "bic_eps", "random_state", "criteria_clf", "criteria_reg"]
+                        "max_nbr_values_cat", "bic_eps", "random_state", "criteria_clf", "criteria_reg", "agg_fun"]
 
     parameters = [
         [2,3,4,6,8,10,12], # max_depth
@@ -119,6 +119,7 @@ def run_ImpurityParTree(dataset: str, res_folder):
         [42],  # random_state
         ["gini", "entropy", "me"],  # criteria_clf
         ["r2", "mape"], #criteria_reg
+        ["mean", "min", "max"],  # agg_fun
     ]
 
     els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False, dynamic_ncols=True)
@@ -130,7 +131,7 @@ def run_ImpurityParTree(dataset: str, res_folder):
                        + dataset.split("/")[-1].split("\\")[-1]+"-" \
                        + ("_".join([str(x) for x in els])+".")
 
-            if os.path.exists(res_folder+filename):
+            if os.path.exists(res_folder+filename+"csv"):
                 continue
 
             cpt = ImpurityParTree(els[0], els[1], els[2], els[3], els[4], els[5], els[6], els[7], els[8],
@@ -200,7 +201,7 @@ def run_PrincipalParTree(dataset:str, res_folder):
                            + dataset.split("/")[-1].split("\\")[-1] + "-" \
                            + ("_".join([str(x) for x in els]) + ".")
 
-                if os.path.exists(res_folder + filename):
+                if os.path.exists(res_folder + filename+"csv"):
                     continue
 
                 cpt = PrincipalParTree(els[0], els[1], els[2], els[3], els[4], els[5], els[6], els[7], els[8], els[9],
