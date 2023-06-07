@@ -1,7 +1,10 @@
 import itertools
 import os
 import time
+import warnings
 
+from ExKMC.Tree import Tree
+from ShallowTree.ShallowTree import ShallowTree
 from kmodes.kmodes import KModes
 import numpy as np
 import pandas as pd
@@ -28,15 +31,17 @@ max_nbr_values_cat = [20, 100]  # max_nbr_values_cat
 
 def run(datasets: str, destination_folder: str):
     runs = [
-        ("xmeans", run_pyclust_xmeans),
-        ("pycl_agglomerative", run_pyclust_agglomerativeClust),
-        ("skl_agglomerative", run_sklearn_agglomerativeClust),
-        ("skl_kmeans", run_sklearn_kmeans),
-        ("skl_optics", run_sklearn_optics),
-        ("skl_dbscan", run_sklearn_dbscan),
-        ("skl_birch", run_sklearn_birch),
-        ("skl_bisectiong", run_sklearn_bis_kmeans),
-        ("kmodes", run_kmodes),
+        #("xmeans", run_pyclust_xmeans),
+        #("pycl_agglomerative", run_pyclust_agglomerativeClust),
+        #("skl_agglomerative", run_sklearn_agglomerativeClust),
+        #("skl_kmeans", run_sklearn_kmeans),
+        #("skl_optics", run_sklearn_optics),
+        #("skl_dbscan", run_sklearn_dbscan),
+        #("skl_birch", run_sklearn_birch),
+        #("skl_bisectiong", run_sklearn_bis_kmeans),
+        #("kmodes", run_kmodes),
+        ("ShallowTree", run_ShallowTree),
+        ("ExKMC", run_ExKMC),
 
     ]
 
@@ -623,6 +628,135 @@ def run_sklearn_birch(dataset: str, res_folder):
         except Exception as e:
             print(f"Errore dataset {dataset}, parametri {'_'.join([str(x) for x in els]) + '.csv'}")
             raise e
+
+
+def run_ShallowTree(dataset: str, res_folder):
+    has_y = "_y.zip" in dataset
+
+    df = pd.read_csv(dataset, index_col=None)
+    y = None
+    if has_y:
+        y = df[df.columns[-1]]
+        df = df.drop(columns=[df.columns[-1]])
+
+    hyperparams_name = ["n_clusters", "depth_factor", "max_nbr_values", "max_nbr_values_cat"]
+
+    parameters = [
+        range(2, 12 + 1, 2),  # n_clusters
+        [0.01, 0.03, 0.05, 0, 1],  # depth_factor
+        max_nbr_values,
+        max_nbr_values_cat
+    ]
+
+    els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
+    for els in els_bar:
+        try:
+            els_bar.set_description("_".join([str(x) for x in els]) + ".csv")
+
+            colNames = hyperparams_name + ["time", "silhouette", "calinski_harabasz", "davies_bouldin"]
+            if has_y:
+                colNames += ["r_score", "adj_rand", "mut_info_score", "adj_mutual_info_score", "norm_mutual_info_score",
+                             "homog_score", "complete_score", "v_msr_score", "fwlks_mallows_score"]
+
+            filename = "ShallowTree-" \
+                       + dataset.split("/")[-1].split("\\")[-1] + "-" \
+                       + ("_".join([str(x) for x in els]) + ".csv")
+
+            if os.path.exists(res_folder + filename):
+                continue
+
+            ct = ColumnTransformer([
+                ('std_scaler', StandardScaler(), make_column_selector(dtype_include=['int', 'float'])),
+                ("cat", OrdinalEncoder(), make_column_selector(dtype_include="object"))],
+                remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=os.cpu_count())
+
+            X = ct.fit_transform(df)
+            _, _, X = prepare_data(X, els[-2], els[-1])
+
+            cpt = ShallowTree(k=els[0], depth_factor=els[1], random_state=42)
+
+            with warnings.catch_warnings():
+                warnings.simplefilter(action='ignore', category=FutureWarning)
+
+                start = time.time()
+                labels = cpt.fit_predict(X)
+                stop = time.time()
+
+            row = list(els) + [stop - start] + measures.get_metrics_uns(X, labels)
+            if has_y:
+                row += measures.get_metrics_s(labels, y)
+
+            pd.DataFrame([row], columns=colNames).to_csv(res_folder + filename, index=False)
+        except Exception as e:
+            print(f"Errore dataset {dataset}, parametri {'_'.join([str(x) for x in els]) + '.csv'}")
+            raise e
+
+
+def run_ExKMC(dataset: str, res_folder):
+    has_y = "_y.zip" in dataset
+
+    df = pd.read_csv(dataset, index_col=None)
+    y = None
+    if has_y:
+        y = df[df.columns[-1]]
+        df = df.drop(columns=[df.columns[-1]])
+
+    hyperparams_name = ["n_clusters", "max_leaves", "base_tree", "max_nbr_values", "max_nbr_values_cat"]
+
+    parameters = [
+        range(2, 12 + 1, 2),  # k
+        [2, 3, 4, 6, 8, 10, 12],  # max_leaves
+        ["IMM", "NONE"], #base_tree
+        max_nbr_values,
+        max_nbr_values_cat
+    ]
+
+    els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
+    for els in els_bar:
+        if els[0] > els[1]:
+            continue
+
+        try:
+            els_bar.set_description("_".join([str(x) for x in els]) + ".csv")
+
+            colNames = hyperparams_name + ["time", "silhouette", "calinski_harabasz", "davies_bouldin"]
+            if has_y:
+                colNames += ["r_score", "adj_rand", "mut_info_score", "adj_mutual_info_score", "norm_mutual_info_score",
+                             "homog_score", "complete_score", "v_msr_score", "fwlks_mallows_score"]
+
+            filename = "ExKMC-" \
+                       + dataset.split("/")[-1].split("\\")[-1] + "-" \
+                       + ("_".join([str(x) for x in els]) + ".csv")
+
+            if os.path.exists(res_folder + filename):
+                continue
+
+            ct = ColumnTransformer([
+                ('std_scaler', StandardScaler(), make_column_selector(dtype_include=['int', 'float'])),
+                ("cat", OrdinalEncoder(), make_column_selector(dtype_include="object"))],
+                remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=os.cpu_count())
+
+            X = ct.fit_transform(df)
+            _, _, X = prepare_data(X, els[-2], els[-1])
+
+            cpt = Tree(k=els[0], max_leaves=els[1], base_tree=els[2],  random_state=42)
+
+            with warnings.catch_warnings():
+                warnings.simplefilter(action='ignore', category=FutureWarning)
+
+                start = time.time()
+                labels = cpt.fit_predict(X)
+                stop = time.time()
+
+            row = list(els) + [stop - start] + measures.get_metrics_uns(X, labels)
+            if has_y:
+                row += measures.get_metrics_s(labels, y)
+
+            pd.DataFrame([row], columns=colNames).to_csv(res_folder + filename, index=False)
+        except Exception as e:
+            print(f"Errore dataset {dataset}, parametri {'_'.join([str(x) for x in els]) + '.csv'}")
+            raise e
+
 
 
 

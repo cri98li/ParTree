@@ -8,7 +8,7 @@ import run_classicClustering as rcc
 
 modules = [
     rcc,
-    rkd,
+    #rkd,
     #rpt
 ]
 
