@@ -19,7 +19,7 @@ with open(path.join(here, "requirements.txt"), encoding="utf-8") as f:
 
 setup(
     name="ParTree",
-    version="0.0.1",
+    version="0.0.2-1",
     license="BSD-Clause-2",
     description="Package description",
     url="https://github.com/cri98li/ParTree",

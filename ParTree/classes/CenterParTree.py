@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import stats
-from scipy.spatial.distance import cdist, jaccard
-from sklearn.metrics.pairwise import cosine_similarity, euclidean_distances
+from scipy.spatial.distance import cdist
+from sklearn.metrics.pairwise import cosine_similarity
 from tqdm.auto import tqdm
 
 from ParTree.algorithms.bic_estimator import bic

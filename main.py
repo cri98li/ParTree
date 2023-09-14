@@ -13,8 +13,8 @@ from ParTree.classes.PrincipalParTree import PrincipalParTree
 from ParTree.classes.VarianceParTree import VarianceParTree
 
 if __name__ == '__main__':
-    #data = pd.read_csv('Experiments/datasets/real/compas-scores-two-years.zip')
-    data = pd.read_csv('Experiments/datasets/syntetic/2d-3c-no123_y.zip')
+    data = pd.read_csv('Experiments/datasets/real/compas-scores-two-years_y.zip')
+    #data = pd.read_csv('Experiments/datasets/syntetic/2d-4c_y.zip')
 
     print(data.columns)
 
@@ -32,8 +32,8 @@ if __name__ == '__main__':
         n_jobs=6,
         verbose=True
     )
-    cptree = ImpurityParTree(n_jobs=1, max_nbr_values_cat=np.inf)
-    #cptree = PrincipalParTree(2, 2, 3, 5, np.inf, np.inf, 0.0, 42, 1, False, 0)
+    #cptree = ImpurityParTree(n_jobs=1, max_nbr_values_cat=np.inf)
+    cptree = PrincipalParTree(2, 2, 3, 5, np.inf, np.inf, 0.0, 42, 1, False, 0)
     #cptree = VarianceParTree(2, 2, 3, 5, 100, 100, 0.0, 42, 1, False)
 
     def cluster_info(obj):
@@ -50,8 +50,8 @@ if __name__ == '__main__':
 
     ct = ColumnTransformer([
         ('std_scaler', scaler, make_column_selector(dtype_include=['int', 'float'])),
-        ("cat", OrdinalEncoder(), make_column_selector(dtype_include="object")),
-        #("cat", OneHotEncoder(), make_column_selector(dtype_include="object"))
+        #("cat", OrdinalEncoder(), make_column_selector(dtype_include="object")),
+        ("cat", OneHotEncoder(), make_column_selector(dtype_include="object"))
         ],
         remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=12)
 
