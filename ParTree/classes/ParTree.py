@@ -4,10 +4,12 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ProcessPoolExecutor
 from itertools import count
 from typing import Union
+from sklearn.tree import DecisionTreeRegressor
 
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
+from sklearn.metrics import r2_score
 from ParTree.algorithms.bic_estimator import bic
 from ParTree.algorithms.data_preparation import prepare_data
 from ParTree.algorithms.data_splitter import DecisionSplit
@@ -29,6 +31,7 @@ class ParTree(ABC):
             max_nbr_clusters: int = 10,
             min_samples_leaf: int = 3,
             min_samples_split: int = 5,
+            max_nbr_values: Union[int, float] = np.inf,
             max_nbr_values_cat: Union[int, float] = np.inf,
             bic_eps: float = 0.0,
             random_state: int = None,
@@ -77,7 +80,7 @@ class ParTree(ABC):
         self.max_nbr_clusters = max_nbr_clusters
         self.min_samples_leaf = min_samples_leaf
         self.min_samples_split = min_samples_split
-        self.max_nbr_values = np.inf
+        self.max_nbr_values = max_nbr_values
         self.max_nbr_values_cat = max_nbr_values_cat
         self.bic_eps = bic_eps
         self.random_state = random_state
@@ -92,6 +95,7 @@ class ParTree(ABC):
         self.labels_ = None
         self.clf_dict_ = None
         self.bic_ = None
+        self.r2_ = None
         self.label_encoder_ = None
         self.cat_indexes = None
         self.feature_values = None
@@ -99,12 +103,22 @@ class ParTree(ABC):
         self.queue = list()
 
     def _make_leaf(self, node: ParTree_node):
+        clf_n = DecisionTreeRegressor(
+            max_depth=1,
+            min_samples_leaf=self.min_samples_leaf,
+            min_samples_split=self.min_samples_split,
+            random_state=self.random_state,
+        )
         nbr_samples = len(node.idx)
+        clf_n.fit(self.X[node.idx], [0] * nbr_samples)
         leaf_labels = np.array([node.label] * nbr_samples).astype(int)
-        node_bic = bic(self.X[node.idx], [0] * nbr_samples)
+        #node_bic = bic(self.X[node.idx], [0] * nbr_samples)
+        #node_r2 = r2_score(self.X[node.idx], [0] * nbr_samples)
+        node_r2 = clf_n.score(self.X[node.idx], [0] * nbr_samples)
         node.samples = nbr_samples
         node.support = nbr_samples / len(self.X)
-        node.bic = node_bic
+        #node.bic = node_bic
+        node.r2 = node_r2
         node.is_leaf = True
         self.labels_[node.idx] = leaf_labels
 
@@ -140,7 +154,6 @@ class ParTree(ABC):
 
         while len(self.queue) > 0 and nbr_curr_clusters + len(self.queue) <= self.max_nbr_clusters:
             _, (_, idx_iter, node_depth, node) = heapq.heappop(self.queue)
-
             nbr_samples = len(idx_iter)
 
             if nbr_curr_clusters + len(self.queue) + 1 >= self.max_nbr_clusters \
@@ -150,16 +163,28 @@ class ParTree(ABC):
                 nbr_curr_clusters += 1
                 continue
 
-            clf, labels, bic_children, is_oblique = self._make_split(idx_iter)
+            #clf, labels, bic_children, is_oblique = self._make_split(idx_iter)
+            (clf, labels, r2_children, is_oblique) = self._make_split(idx_iter)
 
             if len(np.unique(labels)) == 1:
                 self._make_leaf(node)
                 nbr_curr_clusters += 1
                 continue
 
-            bic_parent = bic(self.X[idx_iter], [0] * nbr_samples)
+            clf_p = DecisionTreeRegressor(
+                max_depth=1,
+                min_samples_leaf=self.min_samples_leaf,
+                min_samples_split=self.min_samples_split,
+                random_state=self.random_state,
+            )
 
-            if bic_parent < bic_children - self.bic_eps * np.abs(bic_parent):
+            clf_p.fit(self.X[idx_iter], [0] * nbr_samples)
+            #bic_parent = bic(self.X[idx_iter], [0] * nbr_samples)
+            y_pred = [0] * nbr_samples
+            r2_parent = clf_p.score(self.X[idx_iter], y_pred)
+
+            #if bic_parent < bic_children - self.bic_eps * np.abs(bic_parent):
+            if r2_parent < r2_children - self.bic_eps * np.abs(r2_parent):
                 self._make_leaf(node)
                 nbr_curr_clusters += 1
                 continue
@@ -171,25 +196,39 @@ class ParTree(ABC):
 
             cluster_id += 1
             node_l = ParTree_node(idx=idx_all_l, label=cluster_id)
-            bic_l = bic(X[idx_iter[idx_l]], [0] * len(idx_l))
+            #bic_l = bic(X[idx_iter[idx_l]], [0] * len(idx_l))
+            r2_l = clf_p.score(X[idx_iter[idx_l]], [0] * len(idx_l))
 
             cluster_id += 1
             node_r = ParTree_node(idx=idx_all_r, label=cluster_id)
-            bic_r = bic(X[idx_iter[idx_r]], [0] * len(idx_r))
+            #bic_r = bic(X[idx_iter[idx_r]], [0] * len(idx_r))
+            r2_r = clf_p.score(X[idx_iter[idx_r]], [0] * len(idx_r))
 
             node.clf = clf
             node.node_l = node_l
             node.node_r = node_r
-            node.bic = bic_parent
+            #node.bic = bic_parent
+            node.r2 = r2_parent
             node.is_oblique = is_oblique
 
-            heapq.heappush(self.queue, (-len(idx_all_l) + 0.00001 * bic_l, (next(tiebreaker), idx_all_l, node_depth + 1, node_l)))
-            heapq.heappush(self.queue, (-len(idx_all_r) + 0.00001 * bic_r, (next(tiebreaker), idx_all_r, node_depth + 1, node_r)))
+            #heapq.heappush(self.queue, (-len(idx_all_l) + 0.00001 * bic_l, (next(tiebreaker), idx_all_l, node_depth + 1, node_l)))
+            #heapq.heappush(self.queue, (-len(idx_all_r) + 0.00001 * bic_r, (next(tiebreaker), idx_all_r, node_depth + 1, node_r)))
 
+            heapq.heappush(self.queue, (-len(idx_all_l) + 0.00001 * r2_l, (next(tiebreaker), idx_all_l, node_depth + 1, node_l)))
+            heapq.heappush(self.queue, (-len(idx_all_r) + 0.00001 * r2_r, (next(tiebreaker), idx_all_r, node_depth + 1, node_r)))
+
+        clf_t = DecisionTreeRegressor(
+            max_depth=1,
+            min_samples_leaf=self.min_samples_leaf,
+            min_samples_split=self.min_samples_split,
+            random_state=self.random_state,
+        )
         self.clf_dict_ = root_node
         self.label_encoder_ = LabelEncoder()
         self.labels_ = self.label_encoder_.fit_transform(self.labels_)
-        self.bic_ = bic(self.X, self.labels_)
+        # self.bic_ = bic(self.X, self.labels_)
+        clf_t.fit(self.X, [0] * self.labels_)
+        self.r2_ = clf_t.score(self.X, self.labels_)
 
     def predict(self, X):
         idx = np.arange(X.shape[0])
