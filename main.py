@@ -41,8 +41,8 @@ if __name__ == '__main__':
 
     def cluster_info(obj):
         n_cluster = len(np.unique(obj.labels_))
-        #bic = "%.4f" % obj.bic_
-        r2 = "%.4f" % obj.r2_
+        bic = "%.4f" % obj.bic_
+        #r2 = "%.4f" % obj.r2_
         return r2, n_cluster
 
     if cptree.def_type != "ind":

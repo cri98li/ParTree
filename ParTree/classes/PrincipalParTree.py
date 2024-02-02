@@ -88,6 +88,8 @@ class PrincipalParTree(ParTree):
 
         if self.def_type == 'ind':
             similarity_matrix = self._calculate_similarity_matrix(points)
+            for i in range(n):
+                cluster_indices = np.where(labels == labels[i])[0]
             similar_count = np.sum(similarity_matrix[i, cluster_indices]) - similarity_matrix[i, i]
             penalty = similar_count/len(cluster_indices)
             penalties[i] = penalty
@@ -207,13 +209,13 @@ class PrincipalParTree(ParTree):
                         penalty = self._compute_penalty(self.X[idx_iter], clf_i.apply(modified_X[idx_iter]))
                     else:
                         penalty = 0
-                    composite_score = temp_score - (temp_score*penalty)
+                    composite_score = temp_score - (abs(temp_score)*penalty)
 
                     # Update the best split if this is better
                     if composite_score < best_split_score:
                         best_split_score = composite_score
                         best_split_value = value
-                        best_r2_score = -temp_score
+                        best_r2_score = temp_score
 
                     # salvare valore split come value, penalty r2
 
