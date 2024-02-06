@@ -45,7 +45,7 @@ if __name__ == '__main__':
         #r2 = "%.4f" % obj.r2_
         return r2, n_cluster
 
-    if cptree.def_type != "ind":
+    if cptree.def_type != "ind" and cptree.def_type != None:
         protected_attribute_index = cptree.protected_attribute
         protected_attribute_name = data.columns[protected_attribute_index]
     else:

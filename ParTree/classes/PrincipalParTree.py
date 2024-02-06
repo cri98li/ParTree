@@ -197,14 +197,14 @@ class PrincipalParTree(ParTree):
                 best_r2_score = None
 
                 for value in np.unique(self.X[:, feature_index]):
-                    modified_X = self.X.copy()
-                    modified_X[self.X[:, feature_index] <= value, feature_index] = 0
-                    modified_X[self.X[:, feature_index] > value, feature_index] = 1
+                    modified_X = np.zeros(self.X.shape)
+                    modified_X[self.X[:, feature_index] <= value, feature_index] = value
+                    modified_X[self.X[:, feature_index] > value, feature_index] = 2*(abs(value)+1)
 
                     # Train the Decision Tree on the modified feature
                     clf_i.fit(modified_X[idx_iter], transf.fit_transform(self.X[idx_iter]))
                     labels_i = clf_i.apply(modified_X[idx_iter])
-                    temp_score = clf_i.score(modified_X[idx_iter], transf.fit_transform(self.X[idx_iter])) #da provare
+                    temp_score = clf_i.score(self.X[idx_iter], transf.fit_transform(self.X[idx_iter])) #da provare
                     if self.def_type is not None:
                         penalty = self._compute_penalty(self.X[idx_iter], clf_i.apply(modified_X[idx_iter]))
                     else:
