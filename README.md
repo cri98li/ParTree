@@ -30,6 +30,7 @@ from ParTree import print_rules
 
 # load the data
 df = pd.read_csv(dataset) 
+X = df.values
 
 #train the model
 partree = PrincipalParTree()
