@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.tree import DecisionTreeRegressor
 from tqdm.auto import trange
 from sklearn.metrics import r2_score
+from collections import Counter
 from datetime import datetime
 
 from ParTree.algorithms.bic_estimator import bic
@@ -32,7 +33,6 @@ class PrincipalParTree(ParTree):
             max_oblique_features=2,
             n_jobs=1,
             verbose=False,
-            mv=None,
             protected_attribute = None,
             def_type = None,
             filename = None
@@ -64,22 +64,20 @@ class PrincipalParTree(ParTree):
         self.n_components = n_components
         self.oblique_splits = oblique_splits
         self.max_oblique_features = max_oblique_features
-        self.mv = mv
         self.protected_attribute = protected_attribute
         self.def_type = def_type
         self.filename = filename
 
-    def _calculate_similarity_matrix(self, points, threshold=9):
+    def _calculate_similarity_matrix(self, points):
         points_arr = np.array(points)
         diff = points_arr[:, np.newaxis, :] - points_arr[np.newaxis, :, :]
         dist_matrix = np.linalg.norm(diff, axis=-1)
-        adjacency_matrix = (dist_matrix < threshold).astype(int)
-        np.fill_diagonal(adjacency_matrix, 0)
+        np.fill_diagonal(dist_matrix, np.nan)
+        mean_distance = np.nanmean(dist_matrix)
+        adjacency_matrix = (dist_matrix < mean_distance).astype(int)
         return adjacency_matrix
 
     def _write_to_file(self, content):
-        #with open(filename, "a") as file:
-        #    file.write(content + "\n")
         with open(self.filename, "a") as file:
             file.write(content + "\n")
 
@@ -87,8 +85,9 @@ class PrincipalParTree(ParTree):
         # users can choose the fairness definition
         # here they choose the individual fairness
         n = len(points)
-        penalties = np.zeros(n)
+        penalties = 0
         count_comp = 0
+        similar_count_log = 0
         # want to retrieve the row index of each point belonging to every cluster
         unique_labels = np.unique(labels)
         cluster_indices = {label: np.where(labels == label)[0] for label in unique_labels}
@@ -97,46 +96,46 @@ class PrincipalParTree(ParTree):
         if self.def_type == 'ind':
             similarity_matrix = self._calculate_similarity_matrix(points)
             for i in range(n):
+                print("i", i)
                 cluster_indices = np.where(labels == labels[i])[0]
-            similar_count = np.sum(similarity_matrix[i, cluster_indices]) - similarity_matrix[i, i]
-            penalty = similar_count/len(cluster_indices)
-            penalties[i] = penalty
+                similar_count = np.sum(similarity_matrix[i, cluster_indices]) - similarity_matrix[i, i]
+                similar_count_log += similar_count
+                print("similar_count", np.sum(similarity_matrix[i, cluster_indices]) )
+                penalty = similar_count/len(cluster_indices)
+                print("penalty", penalty)
+                print("len cluster indices", len(cluster_indices))
+                count_comp += 1
+                penalties += penalty
+                print("penalties", penalties)
 
-            return np.sum(penalties/len(penalties))
+            print("count comp", count_comp)
+            print("penalties", np.sum(penalties))
+
+            return np.sum(penalties) / count_comp
 
         # here users select the demographic parity definition
         elif self.def_type == 'dem':
-            print("----- START NEW SPLIT -----")
-            print("labels", labels)
             penalties = 0
             positive_prediction_rates = {}
+
             # we take each value of the protected attribute
             for cluster in set(labels):
-                print("CLUSTER", cluster)
-                X_filtered = self.X[cluster_indices[cluster]]
-                for group in np.unique(X_filtered[:, self.protected_attribute]):
-                    #print("group", group)
+                X_filtered = points[cluster_indices[cluster]]
+                for group in np.unique(points[:, self.protected_attribute]):
                     total_in_group = (X_filtered[:, self.protected_attribute]).shape[0]
                     positive_predictions_in_group = (
                                 X_filtered[:, self.protected_attribute] == group).sum()
                     positive_prediction_rate = positive_predictions_in_group / total_in_group
                     positive_prediction_rates[group] = positive_prediction_rate
+
                 keys = list(positive_prediction_rates.keys())
-                print("keys", keys)
+
                 for i, key1 in enumerate(keys):
-                    if positive_prediction_rates[key1] == 1:
-                        difference = 1
-                        penalties += difference
-                        count_comp += 1
                     for key2 in keys[i + 1:]:
-                        if positive_prediction_rates[key1] == 1 and (key2 not in positive_prediction_rates or positive_prediction_rates[key2] == 1):
-                            difference = 1
-                        else:
-                            difference = abs(positive_prediction_rates[key1] - positive_prediction_rates[key2])
+                        difference = abs(positive_prediction_rates[key1] - positive_prediction_rates[key2])
                         penalties += difference
                         count_comp += 1
 
-            print("return ", penalties/count_comp)
             return np.sum(penalties) / count_comp
 
         # third definition, group fairness in respect to proportion in the original dataset
@@ -149,21 +148,21 @@ class PrincipalParTree(ParTree):
             penalties = 0
 
             # compute for each value of the protected attribute the number of points in each cluster
-            for group in np.unique(self.X[:, self.protected_attribute]):
-                print("unique values protected attribute", np.unique(self.X[:, self.protected_attribute]))
-                group_counts[group] = (self.X[:, self.protected_attribute] == group).sum()
+            #for group in np.unique(self.X[:, self.protected_attribute]):
+            for group in np.unique(points[:, self.protected_attribute]):
+                group_counts[group] = (points[:, self.protected_attribute] == group).sum()
                 for label in np.unique(labels):
                     total_cluster[label] = (labels == label).sum()
-                    group_cluster_counts[(group, label)] = ((self.X[:, self.protected_attribute] == group) & (labels == label)).sum()
+                    group_cluster_counts[(group, label)] = (
+                                (points[:, self.protected_attribute] == group) & (labels == label)).sum()
 
-            total_count = self.X.shape[0]
+            total_count = points.shape[0]
 
             # Computation of the probability for each cluster and for each group
-            for group in np.unique(self.X[:, self.protected_attribute]):
+            for group in np.unique(points[:, self.protected_attribute]):
                 total_in_group = group_counts[group]
                 if total_in_group > 0:  # Prevent division by zero
                     tot_probability = total_in_group / total_count
-                    # Proportion of group in the entire dataset
                     for label in np.unique(labels):
                         group_cluster_count = group_cluster_counts[(group, label)]
                         group_probability = group_cluster_count / total_cluster[label]  # Proportion of group in the cluster
@@ -171,7 +170,7 @@ class PrincipalParTree(ParTree):
                         penalties += diff
                         count_comp += 1
 
-            return np.sum(penalties) / count_comp
+            return np.sum(penalties) / len(np.unique(labels))
 
         else:
             penalty = 0
@@ -225,14 +224,20 @@ class PrincipalParTree(ParTree):
                 best_labels = None
 
                 thresholds = sorted(np.unique(self.X[:, feature_index]))
-
-                for idx_threshold in range(len(thresholds)-1):
+                modified_X = np.zeros(self.X.shape)
+                for idx_threshold in range(len(thresholds) - 1):
                     value = thresholds[idx_threshold]
-                    value_succ = thresholds[idx_threshold+1]
+                    value_succ = thresholds[idx_threshold + 1]
 
                     modified_X = np.zeros(self.X.shape)
                     modified_X[self.X[:, feature_index] <= value, feature_index] = value
                     modified_X[self.X[:, feature_index] > value, feature_index] = value_succ
+
+                    #modified_X = np.zeros(self.X.shape)
+                    #modified_X[self.X[:, feature_index] <= value, feature_index] = value
+                    #modified_X[self.X[:, feature_index] > value, feature_index] = value_succ
+
+                    #print("modified_X", modified_X)
 
                     # Train the Decision Tree on the modified feature
                     clf_i.fit(modified_X[idx_iter], transf.fit_transform(self.X[idx_iter]))
@@ -265,7 +270,7 @@ class PrincipalParTree(ParTree):
                     # Arrays to hold indexes
                     indexes_of_1 = []
                     indexes_of_2 = []
-
+                    #print("labels", labels_i)
                     # Iterate through the list and append indexes accordingly
                     for index, value in enumerate(labels_i):
                         if value == 1:
@@ -274,17 +279,24 @@ class PrincipalParTree(ParTree):
                             indexes_of_2.append(index)
 
                     protected_attribute_arr = self.X[:, self.protected_attribute]
+                    #print("indexes_of_1",indexes_of_1)
                     cluster_1 = [int(protected_attribute_arr[index]) for index in indexes_of_1]
+                    cluster_1 = Counter(cluster_1)
                     cluster_2 = [int(protected_attribute_arr[index]) for index in indexes_of_2]
+                    cluster_2 = Counter(cluster_2)
+
                     similar_count = None
+                    similar_count_log = None
                 elif self.def_type == 'ind':
                     points = self.X[idx_iter]
                     labels = clf_i.apply(modified_X[idx_iter])
                     n = len(points)
+                    similar_count_log = 0
                     similarity_matrix = self._calculate_similarity_matrix(points)
                     for i in range(n):
                         cluster_indices = np.where(labels == labels[i])[0]
-                    similar_count = np.sum(similarity_matrix[i, cluster_indices]) - similarity_matrix[i, i]
+                        similar_count = np.sum(similarity_matrix[i, cluster_indices]) - similarity_matrix[i, i]
+                        similar_count_log += similar_count
                     cluster_1 = None
                     cluster_2 = None
                 else:
@@ -293,7 +305,7 @@ class PrincipalParTree(ParTree):
                     cluster_2 = None
 
                 #print("LABELS LOG TO CHECK", labels_i)
-                self._write_to_file(f"\nBest split for feature {feature_index}: Value {best_split_value}, Best Split Score {best_split_score}, R2 Score {best_r2_score}, Penalty {penalty}, BIC {best_bic_score}, \nLabels {labels_i}, Cluster 1 {cluster_1}, Cluster 2 {cluster_2}, [IND] similar count {similar_count}\n")
+                self._write_to_file(f"\nBest split for feature {feature_index}: Value {best_split_value}, Best Split Score {best_split_score}, R2 Score {best_r2_score}, Penalty {penalty}, BIC {best_bic_score}, Cluster 1 {cluster_1}, Cluster 2 {cluster_2}, [IND] similar count {similar_count_log}\n")
 
                 r2_c_list.append(best_split_score)
                 clf_list.append(best_clf)
