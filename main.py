@@ -1,5 +1,6 @@
 import time
 from datetime import datetime
+from collections import Counter
 from fairlearn.metrics import demographic_parity_difference
 
 import os
@@ -21,8 +22,8 @@ timestamp = datetime.now().strftime("%Y%m%d_%H%M")
 filename = os.path.join("logs", f"output_{timestamp}.txt")
 
 if __name__ == '__main__':
-    data = pd.read_json('Experiments/datasets/real/genfair_toy.json')
-    #data = pd.read_csv('Experiments/datasets/real/compas-scores-two-years_y.zip')
+    #data = pd.read_json('Experiments/datasets/real/genfair_toy.json')
+    data = pd.read_csv('Experiments/datasets/real/compas-scores-two-years_y.zip')
     #data = pd.read_csv('Experiments/datasets/syntetic/2d-4c_y.zip')
     #data = pd.read_csv('Experiments/datasets/real/german_credit_y.zip')
     #data = pd.read_csv('Experiments/datasets/real/bank.zip')
@@ -47,7 +48,7 @@ if __name__ == '__main__':
     )
     #index = data.columns.tolist().index('sex')
     #cptree = ImpurityParTree(n_jobs=1, max_nbr_values_cat=np.inf)
-    cptree = PrincipalParTree(5, 2, 3, 5, np.inf, np.inf, 0.0, 1, 1, False, 0, mv=None, def_type="gro", protected_attribute=0, filename=filename)
+    cptree = PrincipalParTree(2, 2, 3, 5, np.inf, np.inf, 0.0, 1, 1, False, 0, alfa_ind = 0, alfa_gro = 0, alfa_dem=0, protected_attribute=3, filename=filename)
     #cptree = VarianceParTree(2, 2, 3, 5, 100, 100, 0.0, 42, 1, False)
 
 #    class BinaryEncoder(TransformerMixin):
@@ -80,11 +81,12 @@ if __name__ == '__main__':
         #r2 = "%.4f" % obj.r2_
         return bic, n_cluster
 
-    if cptree.def_type != "ind" and cptree.def_type != None:
-        protected_attribute_index = cptree.protected_attribute
-        protected_attribute_name = data.columns[protected_attribute_index]
-    else:
-        protected_attribute_index = None
+    #if cptree.def_type != "ind" and cptree.def_type != None:
+    protected_attribute_index = cptree.protected_attribute
+    protected_attribute_name = data.columns[protected_attribute_index]
+    print("protected attribute name", protected_attribute_name)
+    #else:
+    #    protected_attribute_index = None
 
     scaler = StandardScaler()
     #print(data.dtypes)
@@ -99,23 +101,23 @@ if __name__ == '__main__':
     #                       n_jobs=12)
 
     transformed_data = pd.DataFrame(ct.fit_transform(data), columns=ct.get_feature_names_out())
-    print("COLUMN NAMES: ", ct.get_feature_names_out())
+    #print("COLUMN NAMES: ", ct.get_feature_names_out())
 
-    if cptree.def_type == "dem" or cptree.def_type == "gro":
+    #if cptree.def_type == "dem" or cptree.def_type == "gro":
 
         # Identify columns in transformed_data that are related to the protected attribute
-        protected_cols = [col for col in transformed_data.columns if col.startswith(protected_attribute_name)]
+    protected_cols = [col for col in transformed_data.columns if col.startswith(protected_attribute_name)]
         #print("protected cols", protected_cols)
 
         # All columns in transformed_data that are not related to the protected attribute
-        other_cols = [col for col in transformed_data.columns if col not in protected_cols]
+    other_cols = [col for col in transformed_data.columns if col not in protected_cols]
 
         # Reconstruct the column order to place the protected columns at the original index
-        new_order = other_cols[:protected_attribute_index] + protected_cols + other_cols[protected_attribute_index:]
+    new_order = other_cols[:protected_attribute_index] + protected_cols + other_cols[protected_attribute_index:]
         #print("new order", new_order)
-        data = transformed_data[new_order]
-    else:
-        data = transformed_data
+    data = transformed_data[new_order]
+    #else:
+    data = transformed_data
 
     #ct = ColumnTransformer([
         #('std_scaler', scaler, make_column_selector(dtype_include=['int', 'float'])),
@@ -131,7 +133,7 @@ if __name__ == '__main__':
     #data = pd.DataFrame(ct.fit_transform(data))
 
     #data = data.drop(data.columns[1], axis=1)
-    print("PRE COL", data.columns)
+    #print("PRE COL", data.columns)
     X = data.values[:, :-1]
     y = data.values[:, -1]
 
@@ -139,7 +141,6 @@ if __name__ == '__main__':
     print(data)
     labels = y
     n_real_cluster = len(np.unique(y))
-
     start = time.time()
     cptree.fit(data)
     end = time.time()
