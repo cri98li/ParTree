@@ -23,13 +23,13 @@ filename = os.path.join("logs", f"output_{timestamp}.txt")
 
 if __name__ == '__main__':
     #data = pd.read_json('Experiments/datasets/real/genfair_toy.json')
-    data = pd.read_csv('Experiments/datasets/real/compas-scores-two-years_y.zip')
+    #data = pd.read_csv('Experiments/datasets/real/compas-scores-two-years_y.zip')
     #data = pd.read_csv('Experiments/datasets/syntetic/2d-4c_y.zip')
-    #data = pd.read_csv('Experiments/datasets/real/german_credit_y.zip')
+    data = pd.read_csv('Experiments/datasets/real/german_credit_y.zip')
     #data = pd.read_csv('Experiments/datasets/real/bank.zip')
 
     print(data.columns)
-    data = data.head(500)
+    data = data.head(10000)
     #data = data.iloc[:, :10]
 
     cptree = CenterParTree(
@@ -39,7 +39,7 @@ if __name__ == '__main__':
         min_samples_split=3,
         max_nbr_values=100,
         max_nbr_values_cat=10,
-        bic_eps=0.0,
+        bic_eps=0.5,
         random_state=42,
         metric_con="cos",
         metric_cat="jaccard",
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     )
     #index = data.columns.tolist().index('sex')
     #cptree = ImpurityParTree(n_jobs=1, max_nbr_values_cat=np.inf)
-    cptree = PrincipalParTree(2, 2, 3, 5, np.inf, np.inf, 0.0, 1, 1, False, 0, alfa_ind = 0, alfa_gro = 0, alfa_dem=0, protected_attribute=3, filename=filename)
+    cptree = PrincipalParTree(2, 2, 3, 5, np.inf, np.inf, 0.0, 1, 1, False, 0, alfa_ind = 0, alfa_gro = 0, alfa_dem=0, protected_attribute=8, filename=filename)
     #cptree = VarianceParTree(2, 2, 3, 5, 100, 100, 0.0, 42, 1, False)
 
 #    class BinaryEncoder(TransformerMixin):
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     #                       n_jobs=12)
 
     transformed_data = pd.DataFrame(ct.fit_transform(data), columns=ct.get_feature_names_out())
-    #print("COLUMN NAMES: ", ct.get_feature_names_out())
+    print("COLUMN NAMES: ", ct.get_feature_names_out())
 
     #if cptree.def_type == "dem" or cptree.def_type == "gro":
 
@@ -133,7 +133,7 @@ if __name__ == '__main__':
     #data = pd.DataFrame(ct.fit_transform(data))
 
     #data = data.drop(data.columns[1], axis=1)
-    #print("PRE COL", data.columns)
+    print("PRE COL", data.columns)
     X = data.values[:, :-1]
     y = data.values[:, -1]
 
