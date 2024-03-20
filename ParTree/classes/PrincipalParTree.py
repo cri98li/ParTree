@@ -75,6 +75,8 @@ class PrincipalParTree(ParTree):
         self.alfa_dem = alfa_dem
         self.alfa_gro = alfa_gro
         self.filename = filename
+        if not (0 <= alfa_ind <= 2) or not (0 <= alfa_gro <= 2) or not (0 <= alfa_dem <= 2):
+            raise ValueError("Arguments must be within the range [0, 2]")
 
     def _calculate_similarity_matrix(self, points):
         points_arr = np.array(points)
@@ -223,6 +225,8 @@ class PrincipalParTree(ParTree):
                     random_state=self.random_state,
                 )
 
+                #("clf_i", clf_i)
+
                 best_split_score = -float('inf')
                 best_split_value = None
                 best_bic_score = None
@@ -232,6 +236,7 @@ class PrincipalParTree(ParTree):
 
                 thresholds = sorted(np.unique(self.X[:, feature_index]))
                 modified_X = np.zeros(self.X.shape)
+                print("range(len(thresholds) - 1)", range(len(thresholds) - 1))
                 for idx_threshold in range(len(thresholds) - 1):
                     value = thresholds[idx_threshold]
                     value_succ = thresholds[idx_threshold + 1]
@@ -240,7 +245,9 @@ class PrincipalParTree(ParTree):
                     modified_X = np.zeros(self.X.shape)
                     modified_X[self.X[:, feature_index] <= value, feature_index] = value
                     modified_X[self.X[:, feature_index] > value, feature_index] = value_succ
-
+                    #print("clf_i.fit(modified_X[idx_iter], y_pca)", clf_i.fit(modified_X[idx_iter], y_pca))
+                    #print("y_pca", y_pca)
+                    #print("modified_X[idx_iter]", modified_X[idx_iter])
                     clf_i.fit(modified_X[idx_iter], y_pca)
                     labels_i = clf_i.apply(modified_X[idx_iter])
                     temp_score = clf_i.score(self.X[idx_iter], y_pca)
@@ -265,35 +272,36 @@ class PrincipalParTree(ParTree):
                 # clusters
                 #if self.def_type == 'dem' or self.def_type == 'gro':
                     # Arrays to hold indexes
-                indexes_of_1 = []
-                indexes_of_2 = []
+               # indexes_of_1 = []
+               # indexes_of_2 = []
                     #print("labels", labels_i)
                     # Iterate through the list and append indexes accordingly
-                for index, value in enumerate(labels_i):
-                    if value == 1:
-                        indexes_of_1.append(index)
-                    elif value == 2:
-                        indexes_of_2.append(index)
+               # for index, value in enumerate(labels_i):
+               #     if value == 1:
+               #         indexes_of_1.append(index)
+               #     elif value == 2:
+               #         indexes_of_2.append(index)
 
-                protected_attribute_arr = self.X[:, self.protected_attribute]
+               # protected_attribute_arr = self.X[:, self.protected_attribute]
                     #print("indexes_of_1",indexes_of_1)
-                cluster_1 = [int(protected_attribute_arr[index]) for index in indexes_of_1]
-                cluster_1 = Counter(cluster_1)
-                cluster_2 = [int(protected_attribute_arr[index]) for index in indexes_of_2]
-                cluster_2 = Counter(cluster_2)
+               # cluster_1 = [int(protected_attribute_arr[index]) for index in indexes_of_1]
+               # cluster_1 = Counter(cluster_1)
+               # cluster_2 = [int(protected_attribute_arr[index]) for index in indexes_of_2]
+               # cluster_2 = Counter(cluster_2)
 
-                similar_count = None
-                similar_count_log = None
-                #elif self.def_type == 'ind':
-                points = self.X[idx_iter]
-                labels = clf_i.apply(modified_X[idx_iter])
-                n = len(points)
-                similar_count_log = 0
-                similarity_matrix = self._calculate_similarity_matrix(points)
-                for i in range(n):
-                    cluster_indices = np.where(labels == labels[i])[0]
-                    similar_count = np.sum(similarity_matrix[i, cluster_indices]) - similarity_matrix[i, i]
-                    similar_count_log += similar_count
+               # similar_count = None
+               # similar_count_log = None
+               # elif self.def_type == 'ind':
+               # points = self.X[idx_iter]
+               # labels = clf_i.apply(modified_X[idx_iter])
+               # #print("LABELS", labels)
+               # n = len(points)
+               # similar_count_log = 0
+               # similarity_matrix = self._calculate_similarity_matrix(points)
+               # for i in range(n):
+               #     cluster_indices = np.where(labels == labels[i])[0]
+               #     similar_count = np.sum(similarity_matrix[i, cluster_indices]) - similarity_matrix[i, i]
+               #     similar_count_log += similar_count
 
                 #self._write_to_file(f"\nBest split for feature {feature_index}: Value {best_split_value}, Best Split Score {best_split_score}, R2 Score {best_r2_score}, Penalty {alfa}, BIC {best_bic_score}, Cluster 1 {cluster_1}, Cluster 2 {cluster_2}, [IND] similar count {similar_count_log}\n")
 
@@ -319,12 +327,16 @@ class PrincipalParTree(ParTree):
                 labels_list.append(olq_labels_i)
                 r2_c_list.append(olq_r2_children_i)
 
+        #print("Il numero due di r2_c_list", r2_c_list)
+        #print("bic_c_list", bic_c_list)
         idx_min = np.argmax(r2_c_list)
         is_oblique = self.oblique_splits and idx_min > 0 and idx_min % 2 == 0
+        #print("labels list before label", labels_list)
+        #print("idxmin", idx_min)
         labels = labels_list[idx_min]
         bic_children = bic_c_list[idx_min]
         r2_children = r2_c_list[idx_min]
         clf = clf_list[idx_min]
         #self._write_to_file(f"Overall Best Split: Feature Index {idx_min}, Bic Children {bic_children}, Is Oblique {is_oblique}, R2 Children {r2_children}\n")
-
+        #print("clf, labels, bic_children, is_oblique", clf, labels, bic_children, is_oblique)
         return clf, labels, bic_children, is_oblique

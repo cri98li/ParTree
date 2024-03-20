@@ -71,7 +71,7 @@ def run_CenterParTree(dataset: str, res_folder):
         [0, 1, 2], # alfa_ind
         [0, 1, 2], # alfa_dem
         [0, 1, 2], # alfa_gro
-        [12] # protected_attribute
+        [4] # protected_attribute
     ]
 
     els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
@@ -190,11 +190,12 @@ def run_PrincipalParTree(dataset:str, res_folder):
         has_y = "_y.zip" in dataset
 
         df = pd.read_csv(dataset, index_col=None)
-        df = df.head(100000)
+        df = df.head(50)
         y = None
+        # if the dataset is iris comment row below
         if has_y:
             y = df[df.columns[-1]]
-            df = df.drop(columns=[df.columns[-1]])
+            #df = df.drop(columns=[df.columns[-1]])
 
         hyperparams_name = ["max_depth", "max_nbr_clusters", "min_samples_leaf", "min_samples_split", "max_nbr_values",
                             "max_nbr_values_cat", "bic_eps", "random_state", "n_components", "oblique_splits",
@@ -222,7 +223,7 @@ def run_PrincipalParTree(dataset:str, res_folder):
             [0, 1, 2],  # alfa_ind
             [0, 1, 2],  # alfa_dem
             [0, 1, 2],  # alfa_gro
-            [0]  # protected_attribute
+            [3]  # protected_attribute
         ]
 
         els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
@@ -282,19 +283,19 @@ def run_PrincipalParTree(dataset:str, res_folder):
             other_cols = [col for col in transformed_data.columns if col not in protected_cols]
             new_order = other_cols[:protected_attribute_index] + protected_cols + other_cols[protected_attribute_index:]
             X = transformed_data[new_order]
-            print("Columns after changing order", X.columns)
+            #print("Columns after changing order", X.columns)
 
-            X_transformed_df = pd.DataFrame(X,
-                                            columns=[f"feature_{i}" for i in range(X.shape[1])])
-            X = X.values[:, :-1]
+            #if the dataset is iris comment row below
+            #X = X.values[:, :-1]
+            X = X.values
 
             start = time.time()
             cpt.fit(X)
             stop = time.time()
 
             row = list(els) + [stop - start] + measures.get_metrics_uns(X, cpt.labels_)
-            print("X", X)
-            print("cpt.labels_", cpt.labels_)
+            #print("X", X)
+            #print("cpt.labels_", cpt.labels_)
             if has_y:
                 row += measures.get_metrics_s(cpt.labels_, y)
 
@@ -313,5 +314,5 @@ def get_version():
 
 
 if __name__ == '__main__':
-    run(['Experiments/datasets/real/german_credit_y.zip'], 'Experiments/prova/' )
+    run(['Experiments/datasets/real/compas-scores-two-years_y.zip'], 'Experiments/prova/' )
 

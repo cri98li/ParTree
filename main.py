@@ -23,13 +23,14 @@ filename = os.path.join("logs", f"output_{timestamp}.txt")
 
 if __name__ == '__main__':
     #data = pd.read_json('Experiments/datasets/real/genfair_toy.json')
-    #data = pd.read_csv('Experiments/datasets/real/compas-scores-two-years_y.zip')
+    data = pd.read_csv('Experiments/datasets/real/compas-scores-two-years_y.zip')
     #data = pd.read_csv('Experiments/datasets/syntetic/2d-4c_y.zip')
-    data = pd.read_csv('Experiments/datasets/real/german_credit_y.zip')
+    #data = pd.read_csv('Experiments/datasets/real/german_credit_y.zip')
     #data = pd.read_csv('Experiments/datasets/real/bank.zip')
+    #data = pd.read_csv('Experiments/datasets/real/iris_y.zip')
 
     print(data.columns)
-    data = data.head(10000)
+    data = data.head(500)
     #data = data.iloc[:, :10]
 
     cptree = CenterParTree(
@@ -48,7 +49,7 @@ if __name__ == '__main__':
     )
     #index = data.columns.tolist().index('sex')
     #cptree = ImpurityParTree(n_jobs=1, max_nbr_values_cat=np.inf)
-    cptree = PrincipalParTree(2, 2, 3, 5, np.inf, np.inf, 0.0, 1, 1, False, 0, alfa_ind = 0, alfa_gro = 0, alfa_dem=0, protected_attribute=8, filename=filename)
+    cptree = PrincipalParTree(2, 2, 3, 5, np.inf, np.inf, 0.0, 42, 1, False, 0, alfa_ind = 2, alfa_gro = 0, alfa_dem=0, protected_attribute=3, filename=filename)
     #cptree = VarianceParTree(2, 2, 3, 5, 100, 100, 0.0, 42, 1, False)
 
 #    class BinaryEncoder(TransformerMixin):
@@ -91,9 +92,9 @@ if __name__ == '__main__':
     scaler = StandardScaler()
     #print(data.dtypes)
     ct = ColumnTransformer([
-    #('std_scaler', scaler, make_column_selector(dtype_include=['int', 'float'])),
-    ("cat", OrdinalEncoder(), make_column_selector(dtype_include="object", pattern=f'^(?!{protected_attribute_index}$).*$')),
-    #("cat", OneHotEncoder(), make_column_selector(dtype_include="object"))
+    ('std_scaler', scaler, make_column_selector(dtype_include=['int', 'float'])),
+    #("cat", OrdinalEncoder(), make_column_selector(dtype_include="object", pattern=f'^(?!{protected_attribute_index}$).*$')),
+    ("cat", OneHotEncoder(), make_column_selector(dtype_include="object"))
     #("cat", OneHotEncoder(), make_column_selector(dtype_include="object", pattern=f'^(?!{protected_attribute_index}$).*$'))
         ],
         remainder='passthrough', verbose_feature_names_out=False, sparse_threshold=0, n_jobs=12)
@@ -117,7 +118,7 @@ if __name__ == '__main__':
         #print("new order", new_order)
     data = transformed_data[new_order]
     #else:
-    data = transformed_data
+    #data = transformed_data
 
     #ct = ColumnTransformer([
         #('std_scaler', scaler, make_column_selector(dtype_include=['int', 'float'])),
@@ -132,13 +133,14 @@ if __name__ == '__main__':
     #data.insert(protected_attribute_index, 'protected attribute', protected_attr_series)
     #data = pd.DataFrame(ct.fit_transform(data))
 
-    #data = data.drop(data.columns[1], axis=1)
+    #data = data.drop(data.columns[0], axis=1)
     print("PRE COL", data.columns)
     X = data.values[:, :-1]
+    #X = data.values
+    print("len X", len(X))
     y = data.values[:, -1]
 
     data = X
-    print(data)
     labels = y
     n_real_cluster = len(np.unique(y))
     start = time.time()

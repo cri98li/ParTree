@@ -246,6 +246,7 @@ class ParTree(ABC):
 
             clf = clf_dict["clf"]
             labels = clf.apply(X[idx_iter])
+            print("LABELS PARTREE", labels)
 
             idx_l, idx_r = np.where(labels == 1)[0], np.where(labels == 2)[0]
             idx_all_l = idx_iter[idx_l]
@@ -256,6 +257,8 @@ class ParTree(ABC):
 
             labels[idx_l] = labels_l
             labels[idx_r] = labels_r
+
+            print("LABELS PARTREE", labels)
 
             return labels
 
@@ -393,6 +396,7 @@ def print_rules(rules, nbr_features, feature_names=None, precision=2, cat_precis
                 feat_s = " + ".join(feat_s)
             if not cat:
                 cond_s = "%s <= %s" % (feat_s, np.round(thr, precision))
+                #print("dentro thr", np.round(thr, precision))
             else:
                 cond_s = "%s = %s" % (feat_s, np.round(thr, cat_precision))
                 if cat_precision == 0:
