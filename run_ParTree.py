@@ -190,7 +190,7 @@ def run_PrincipalParTree(dataset:str, res_folder):
         has_y = "_y.zip" in dataset
 
         df = pd.read_csv(dataset, index_col=None)
-        df = df.head(50)
+        df = df.head(5000)
         y = None
         # if the dataset is iris comment row below
         if has_y:
@@ -230,7 +230,8 @@ def run_PrincipalParTree(dataset:str, res_folder):
         for els in els_bar:
             #try:
             els_bar.set_description("_".join([str(x) for x in els]) + ".csv")
-            colNames = hyperparams_name + ["time", "silhouette", "calinski_harabasz", "davies_bouldin"]
+            colNames = hyperparams_name + ["time", "silhouette", "calinski_harabasz", "davies_bouldin", "fairness_ind",
+                             "fairness_dem", "fairness_gro"]
             if has_y:
                 colNames += ["r_score", "adj_rand", "mut_info_score", "adj_mutual_info_score",
                                  "norm_mutual_info_score",
@@ -262,7 +263,6 @@ def run_PrincipalParTree(dataset:str, res_folder):
                 protected_attribute=els[14],
                 n_jobs=psutil.cpu_count(logical=False)
             )
-            print("COLUMN NAMES", df.columns)
 
             protected_attribute_index = cpt.protected_attribute
             protected_attribute_name = df.columns[protected_attribute_index]
@@ -293,11 +293,15 @@ def run_PrincipalParTree(dataset:str, res_folder):
             cpt.fit(X)
             stop = time.time()
 
-            row = list(els) + [stop - start] + measures.get_metrics_uns(X, cpt.labels_)
+            row = list(els) + [stop - start] + measures.get_metrics_uns(X, cpt.labels_, protected_attribute_index)
             #print("X", X)
             #print("cpt.labels_", cpt.labels_)
             if has_y:
                 row += measures.get_metrics_s(cpt.labels_, y)
+
+            print("row", row)
+
+            print("colNames", colNames)
 
             pd.DataFrame([row], columns=colNames).to_csv(res_folder + filename, index=False)
             #except Exception as e:
@@ -314,5 +318,5 @@ def get_version():
 
 
 if __name__ == '__main__':
-    run(['Experiments/datasets/real/compas-scores-two-years_y.zip'], 'Experiments/prova/' )
+    run(['Experiments/datasets/real/german_credit_y.zip'], 'Experiments/prova/' )
 

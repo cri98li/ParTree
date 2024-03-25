@@ -8,6 +8,7 @@ from datetime import datetime
 
 from ParTree.algorithms.bic_estimator import bic
 from ParTree.algorithms.data_splitter import ObliqueHouseHolderSplit
+from ParTree.algorithms.fairness_definitions import _fairness_gro, _fairness_dem, _fairness_ind
 from ParTree.classes.ParTree import ParTree
 from ParTree.light_famd import MCA, PCA, FAMD
 
@@ -78,90 +79,6 @@ class PrincipalParTree(ParTree):
         if not (0 <= alfa_ind <= 2) or not (0 <= alfa_gro <= 2) or not (0 <= alfa_dem <= 2):
             raise ValueError("Arguments must be within the range [0, 2]")
 
-    def _calculate_similarity_matrix(self, points):
-        points_arr = np.array(points)
-        diff = points_arr[:, np.newaxis, :] - points_arr[np.newaxis, :, :]
-        dist_matrix = np.linalg.norm(diff, axis=-1)
-        np.fill_diagonal(dist_matrix, np.nan)
-        mean_distance = np.nanmean(dist_matrix)
-        adjacency_matrix = (dist_matrix < mean_distance).astype(int)
-        return adjacency_matrix
-
-    def _fairness_ind(self, alfa_ind, n, points, labels):
-        count_comp = 0
-        penalties = 0
-        similar_count_log = 0
-        similarity_matrix = self._calculate_similarity_matrix(points)
-        for i in range(n):
-            cluster_indices = np.where(labels == labels[i])[0]
-            similar_count = np.sum(similarity_matrix[i, cluster_indices]) - similarity_matrix[i, i]
-            similar_count_log += similar_count
-            penalty = similar_count / len(cluster_indices)
-            count_comp += 1
-            penalties += penalty
-
-        penalty = np.sum(penalties) / count_comp
-        return alfa_ind * penalty
-
-    def _fairness_dem(self, alfa_dem, points, labels, cluster_indices):
-        penalties = 0
-        count_comp = 0
-        positive_prediction_rates = {}
-
-        # we take each value of the protected attribute
-        for cluster in set(labels):
-            X_filtered = points[cluster_indices[cluster]]
-            for group in np.unique(points[:, self.protected_attribute]):
-                total_in_group = (X_filtered[:, self.protected_attribute]).shape[0]
-                positive_predictions_in_group = (
-                        X_filtered[:, self.protected_attribute] == group).sum()
-                positive_prediction_rate = positive_predictions_in_group / total_in_group
-                positive_prediction_rates[group] = positive_prediction_rate
-
-            keys = list(positive_prediction_rates.keys())
-
-            for i, key1 in enumerate(keys):
-                for key2 in keys[i + 1:]:
-                    # else:
-                    difference = abs(positive_prediction_rates[key1] - positive_prediction_rates[key2])
-                    penalties += difference
-                    count_comp += 1
-
-        penalty = np.sum(penalties) / count_comp
-        return alfa_dem * penalty
-
-    def _fairness_gro(self, alfa_gro, points, labels):
-
-        group_cluster_counts = {}
-        group_counts = {}
-        total_cluster = {}
-        count_comp = 0
-        penalties = 0
-
-        for group in np.unique(points[:, self.protected_attribute]):
-            # group_counts[group] = (self.X[:, self.protected_attribute] == group).sum()
-            group_counts[group] = (points[:, self.protected_attribute] == group).sum()
-            for label in np.unique(labels):
-                total_cluster[label] = (labels == label).sum()
-                group_cluster_counts[(group, label)] = (
-                        (points[:, self.protected_attribute] == group) & (labels == label)).sum()
-
-        total_count = points.shape[0]
-
-        for group in np.unique(points[:, self.protected_attribute]):
-            total_in_group = group_counts[group]
-            if total_in_group > 0:  # Prevent division by zero
-                tot_probability = total_in_group / total_count
-                for label in np.unique(labels):
-                    group_cluster_count = group_cluster_counts[(group, label)]
-                    group_probability = group_cluster_count / total_cluster[label]
-                    diff = abs(tot_probability - group_probability)
-                    penalties += diff
-                    count_comp += 1
-
-        penalty = np.sum(penalties) / len(np.unique(labels))
-        return alfa_gro * penalty
-
     def _write_to_file(self, content):
         #with open(filename, "a") as file:
         #    file.write(content + "\n")
@@ -175,11 +92,11 @@ class PrincipalParTree(ParTree):
         unique_labels = np.unique(labels)
         cluster_indices = {label: np.where(labels == label)[0] for label in unique_labels}
 
-        penalty_ind = self._fairness_ind(self.alfa_ind, n, points, labels)
-        penalty_dem = self._fairness_dem(self.alfa_dem, points, labels, cluster_indices)
-        penalty_gro = self._fairness_gro(self.alfa_gro, points, labels)
+        penalty_ind = _fairness_ind(n, points, labels)
+        penalty_dem = _fairness_dem(points, labels, cluster_indices, self.protected_attribute)
+        penalty_gro = _fairness_gro(points, labels, self.protected_attribute)
 
-        alfa = penalty_ind + penalty_dem + penalty_gro
+        alfa = self.alfa_ind*penalty_ind + self.alfa_dem*penalty_dem + self.alfa_gro*penalty_gro
 
         return alfa
 
@@ -256,7 +173,7 @@ class PrincipalParTree(ParTree):
                     alfa = self._compute_penalty(self.X[idx_iter], labels_i)
                     #else:
                     #    penalty = 0
-                    composite_score = temp_score - alfa
+                    composite_score = temp_score - alfa #*abs(temp_score-1)
 
                     # Update the best split if this is better
                     if composite_score > best_split_score:
