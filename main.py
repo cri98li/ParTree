@@ -1,7 +1,7 @@
 import time
 from datetime import datetime
 from collections import Counter
-from fairlearn.metrics import demographic_parity_difference
+#from fairlearn.metrics import demographic_parity_difference
 
 import os
 import numpy as np
@@ -32,24 +32,12 @@ if __name__ == '__main__':
     print(data.columns)
     data = data.head(500)
     #data = data.iloc[:, :10]
-
-    cptree = CenterParTree(
-        max_depth=3,
-        max_nbr_clusters=3,
-        min_samples_leaf=3,
-        min_samples_split=3,
-        max_nbr_values=100,
-        max_nbr_values_cat=10,
-        bic_eps=0.5,
-        random_state=42,
-        metric_con="cos",
-        metric_cat="jaccard",
-        n_jobs=6,
-        verbose=True
-    )
     #index = data.columns.tolist().index('sex')
     #cptree = ImpurityParTree(n_jobs=1, max_nbr_values_cat=np.inf)
-    cptree = PrincipalParTree(2, 2, 3, 5, np.inf, np.inf, 0.0, 42, 1, False, 0, alfa_ind = 2, alfa_gro = 0, alfa_dem=0, protected_attribute=3, filename=filename)
+    cptree = PrincipalParTree(2, 2, 3, 5, np.inf, np.inf,
+                              0.0, 42, 1, False, 0,
+                              alfa_ind = 2, alfa_gro = 0, alfa_dem=0, protected_attribute=3, filename=filename,
+                              verbose=True, n_jobs=8)
     #cptree = VarianceParTree(2, 2, 3, 5, 100, 100, 0.0, 42, 1, False)
 
 #    class BinaryEncoder(TransformerMixin):
