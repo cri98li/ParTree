@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.tree import DecisionTreeRegressor
-from tqdm.auto import trange
+from tqdm.auto import trange, tqdm
 from sklearn.metrics import r2_score
 from collections import Counter
 from datetime import datetime
@@ -85,21 +85,6 @@ class PrincipalParTree(ParTree):
         with open(self.filename, "a") as file:
             file.write(content + "\n")
 
-    def _compute_penalty(self, points, labels):
-        n = len(points)
-        penalties = 0
-        count_comp = 0
-        unique_labels = np.unique(labels)
-        cluster_indices = {label: np.where(labels == label)[0] for label in unique_labels}
-
-        penalty_ind = _fairness_ind(n, points, labels)
-        penalty_dem = _fairness_dem(points, labels, cluster_indices, self.protected_attribute)
-        penalty_gro = _fairness_gro(points, labels, self.protected_attribute)
-
-        alfa = self.alfa_ind*penalty_ind + self.alfa_dem*penalty_dem + self.alfa_gro*penalty_gro
-
-        return alfa
-
     def fit(self, X):
         if self.n_components > X.shape[1]:
             raise ValueError("n_components cannot be higher than X.shape[1]")
@@ -127,133 +112,113 @@ class PrincipalParTree(ParTree):
 
         y_pca = transf.fit_transform(typed_X)
 
-        clf_list = list()
-        labels_list = list()
-        bic_c_list = list()
-        r2_c_list = list()
+        best_clf = None
+        best_labels = None
+        best_bic_score = None
+        best_r2_score = -float("inf")
+        best_is_oblique = None
 
-        for i in trange(n_components_split, disable=not self.verbose):
-            for feature_index in range(self.X.shape[1]):
-                print("******************feature**************+****", feature_index)
-                clf_i = DecisionTreeRegressor(
-                    max_depth=3,
-                    min_samples_leaf=self.min_samples_leaf,
-                    min_samples_split=self.min_samples_split,
-                    random_state=self.random_state,
-                )
+        results = []
 
-                #("clf_i", clf_i)
+        for i in trange(n_components_split, disable=not self.verbose, position=0):
+            for feature_index in trange(self.X.shape[1], position=1):
+                #X, y_pca, feature_index, idx_iter, protected_attribute, alfa_ind, alfa_dem, alfa_gro,
+                          #min_samples_leaf, min_samples_split, random_state, verbose
+                results.append(self.processPoolExecutor.submit(_make_split_innerloop,
+                                                               self.X[idx_iter],
+                                                               y_pca[:, i],
+                                                               feature_index,
+                                                               self.protected_attribute,
+                                                               self.alfa_ind,
+                                                               self.alfa_dem,
+                                                               self.alfa_gro,
+                                                               self.min_samples_leaf,
+                                                               self.min_samples_split,
+                                                               self.random_state,
+                                                               False
+                                                               ))
 
-                best_split_score = -float('inf')
-                best_split_value = None
-                best_bic_score = None
-                best_r2_score = None
-                best_clf = None
-                best_labels = None
+        for idx_min, res in enumerate(tqdm(results, disable=not self.verbose)):
+            best_returned_r2_score, best_returned_clf, best_returned_labels, best_returned_bic_score = res.result()
 
-                thresholds = sorted(np.unique(self.X[:, feature_index]))
-                modified_X = np.zeros(self.X.shape)
-                print("range(len(thresholds) - 1)", range(len(thresholds) - 1))
-                for idx_threshold in range(len(thresholds) - 1):
-                    value = thresholds[idx_threshold]
-                    value_succ = thresholds[idx_threshold + 1]
-                    #print("value, value_succ", value, value_succ)
+            if best_returned_r2_score > best_r2_score:
+                best_clf = best_returned_clf
+                best_labels = best_returned_labels
+                best_bic_score = best_returned_bic_score
+                best_r2_score = best_returned_r2_score
+                best_is_oblique = self.oblique_splits and idx_min > 0 and idx_min % 2 == 0
 
-                    modified_X = np.zeros(self.X.shape)
-                    modified_X[self.X[:, feature_index] <= value, feature_index] = value
-                    modified_X[self.X[:, feature_index] > value, feature_index] = value_succ
-                    #print("clf_i.fit(modified_X[idx_iter], y_pca)", clf_i.fit(modified_X[idx_iter], y_pca))
-                    #print("y_pca", y_pca)
-                    #print("modified_X[idx_iter]", modified_X[idx_iter])
-                    clf_i.fit(modified_X[idx_iter], y_pca)
-                    labels_i = clf_i.apply(modified_X[idx_iter])
-                    temp_score = clf_i.score(self.X[idx_iter], y_pca)
-                    bic_children_i = bic(self.X[idx_iter], (np.array(labels_i) - 1).tolist())
+        return best_clf, best_labels, best_bic_score, best_is_oblique
 
-                    alfa = self._compute_penalty(self.X[idx_iter], labels_i)
-                    #else:
-                    #    penalty = 0
-                    composite_score = temp_score - alfa #*abs(temp_score-1)
 
-                    # Update the best split if this is better
-                    if composite_score > best_split_score:
-                        best_split_score = composite_score
-                        best_split_value = value
-                        best_bic_score = bic_children_i
-                        best_r2_score = temp_score
-                        best_clf = clf_i
-                        best_labels = labels_i
+def _compute_penalty_old(points, labels, protected_attribute, alfa_ind, alfa_dem, alfa_gro):
+    n = len(points)
+    unique_labels = np.unique(labels)
+    cluster_indices = {label: np.where(labels == label)[0] for label in unique_labels}
 
-                    #self._write_to_file(f"\tFeature {feature_index}, Value {value}, Iteration Final Split Score {composite_score}, Penalty {alfa}, R2 Score {temp_score}, BIC {bic_children_i}")
+    penalty_ind = _fairness_ind(n, points, labels)
+    penalty_dem = _fairness_dem(points, labels, cluster_indices, protected_attribute)
+    penalty_gro = _fairness_gro(points, labels, protected_attribute)
 
-                # clusters
-                #if self.def_type == 'dem' or self.def_type == 'gro':
-                    # Arrays to hold indexes
-               # indexes_of_1 = []
-               # indexes_of_2 = []
-                    #print("labels", labels_i)
-                    # Iterate through the list and append indexes accordingly
-               # for index, value in enumerate(labels_i):
-               #     if value == 1:
-               #         indexes_of_1.append(index)
-               #     elif value == 2:
-               #         indexes_of_2.append(index)
+    alfa = alfa_ind*penalty_ind + alfa_dem*penalty_dem + alfa_gro*penalty_gro
 
-               # protected_attribute_arr = self.X[:, self.protected_attribute]
-                    #print("indexes_of_1",indexes_of_1)
-               # cluster_1 = [int(protected_attribute_arr[index]) for index in indexes_of_1]
-               # cluster_1 = Counter(cluster_1)
-               # cluster_2 = [int(protected_attribute_arr[index]) for index in indexes_of_2]
-               # cluster_2 = Counter(cluster_2)
+    return alfa
 
-               # similar_count = None
-               # similar_count_log = None
-               # elif self.def_type == 'ind':
-               # points = self.X[idx_iter]
-               # labels = clf_i.apply(modified_X[idx_iter])
-               # #print("LABELS", labels)
-               # n = len(points)
-               # similar_count_log = 0
-               # similarity_matrix = self._calculate_similarity_matrix(points)
-               # for i in range(n):
-               #     cluster_indices = np.where(labels == labels[i])[0]
-               #     similar_count = np.sum(similarity_matrix[i, cluster_indices]) - similarity_matrix[i, i]
-               #     similar_count_log += similar_count
+def _compute_penalty(points, labels, protected_attribute, alfa_ind, alfa_dem, alfa_gro):
+    n = len(points)
+    unique_labels = np.unique(labels)
+    cluster_indices = {label: np.where(labels == label)[0] for label in unique_labels}
 
-                #self._write_to_file(f"\nBest split for feature {feature_index}: Value {best_split_value}, Best Split Score {best_split_score}, R2 Score {best_r2_score}, Penalty {alfa}, BIC {best_bic_score}, Cluster 1 {cluster_1}, Cluster 2 {cluster_2}, [IND] similar count {similar_count_log}\n")
+    penalty = .0
 
-                r2_c_list.append(best_split_score)
-                clf_list.append(best_clf)
-                labels_list.append(best_labels)
-                bic_c_list.append(best_bic_score)
+    if alfa_ind != 0:
+        penalty += _fairness_ind(n, points, labels)*alfa_ind
+    if alfa_dem != 0:
+        penalty += _fairness_dem(points, labels, cluster_indices, protected_attribute)*alfa_dem
+    if alfa_gro != 0:
+        penalty += _fairness_gro(points, labels, protected_attribute)*alfa_gro
 
-            if self.oblique_splits and i > 0:
-                olq_clf_i = ObliqueHouseHolderSplit(
-                    pca=transf,
-                    max_oblique_features=self.max_oblique_features,
-                    min_samples_leaf=self.min_samples_leaf,
-                    min_samples_split=self.min_samples_split,
-                    random_state=self.random_state,
-                )
+    return penalty
 
-                olq_clf_i.fit(self.X[idx_iter], y_pca[:, i])
-                olq_labels_i = olq_clf_i.apply(self.X[idx_iter])
-                olq_r2_children_i = r2_score(self.X[idx_iter], (np.array(labels_i) - 1).tolist())
+def _make_split_innerloop(X, y_pca, feature_index, protected_attribute, alfa_ind, alfa_dem, alfa_gro,
+                          min_samples_leaf, min_samples_split, random_state, verbose):
+    clf_i = DecisionTreeRegressor(
+        max_depth=3,
+        min_samples_leaf=min_samples_leaf,
+        min_samples_split=min_samples_split,
+        random_state=random_state,
+    )
 
-                clf_list.append(olq_clf_i)
-                labels_list.append(olq_labels_i)
-                r2_c_list.append(olq_r2_children_i)
+    # ("clf_i", clf_i)
 
-        #print("Il numero due di r2_c_list", r2_c_list)
-        #print("bic_c_list", bic_c_list)
-        idx_min = np.argmax(r2_c_list)
-        is_oblique = self.oblique_splits and idx_min > 0 and idx_min % 2 == 0
-        #print("labels list before label", labels_list)
-        #print("idxmin", idx_min)
-        labels = labels_list[idx_min]
-        bic_children = bic_c_list[idx_min]
-        r2_children = r2_c_list[idx_min]
-        clf = clf_list[idx_min]
-        #self._write_to_file(f"Overall Best Split: Feature Index {idx_min}, Bic Children {bic_children}, Is Oblique {is_oblique}, R2 Children {r2_children}\n")
-        #print("clf, labels, bic_children, is_oblique", clf, labels, bic_children, is_oblique)
-        return clf, labels, bic_children, is_oblique
+    best_split_score = -float('inf')
+    best_bic_score = None
+    best_clf = None
+    best_labels = None
+
+    thresholds = sorted(np.unique(X[:, feature_index]))
+    for idx_threshold in trange(len(thresholds) - 1, disable=not verbose):
+        value = thresholds[idx_threshold]
+        value_succ = thresholds[idx_threshold + 1]
+
+        modified_X = np.zeros(X.shape)
+        modified_X[X[:, feature_index] <= value, feature_index] = value
+        modified_X[X[:, feature_index] > value, feature_index] = value_succ
+
+        clf_i.fit(modified_X, y_pca)
+        labels_i = clf_i.apply(modified_X)
+        temp_score = clf_i.score(X, y_pca)
+        bic_children_i = bic(X, (np.array(labels_i) - 1).tolist())
+
+        alfa = _compute_penalty(X, labels_i, protected_attribute, alfa_ind, alfa_dem, alfa_gro)
+        composite_score = temp_score - alfa  # *abs(temp_score-1)
+
+        # Update the best split if this is better
+        if composite_score > best_split_score:
+            best_split_score = composite_score
+            best_bic_score = bic_children_i
+            best_clf = clf_i
+            best_labels = labels_i
+
+    # r2_c_list, clf_list, labels_list, bic_c_list
+    return best_split_score, best_clf, best_labels, best_bic_score
