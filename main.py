@@ -6,6 +6,8 @@ from collections import Counter
 import os
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import psutil
 from sklearn.compose import make_column_selector, ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OrdinalEncoder, OneHotEncoder
 from sklearn.base import TransformerMixin
@@ -23,7 +25,9 @@ filename = os.path.join("logs", f"output_{timestamp}.txt")
 
 if __name__ == '__main__':
     #data = pd.read_json('Experiments/datasets/real/genfair_toy.json')
-    data = pd.read_csv('Experiments/datasets/real/compas-scores-two-years_y.zip')
+    data = pd.read_csv('Experiments/datasets/real/compas-scores-two-years_y.zip', index_col=0)
+    data.drop(columns=["r_charge_desc", "c_charge_desc"], inplace=True)
+
     #data = pd.read_csv('Experiments/datasets/syntetic/2d-4c_y.zip')
     #data = pd.read_csv('Experiments/datasets/real/german_credit_y.zip')
     #data = pd.read_csv('Experiments/datasets/real/bank.zip')
@@ -34,10 +38,24 @@ if __name__ == '__main__':
     #data = data.iloc[:, :10]
     #index = data.columns.tolist().index('sex')
     #cptree = ImpurityParTree(n_jobs=1, max_nbr_values_cat=np.inf)
-    cptree = PrincipalParTree(2, 2, 3, 5, np.inf, np.inf,
-                              0.0, 42, 1, False, 0,
-                              alfa_ind = 2, alfa_gro = 0, alfa_dem=0, protected_attribute=3, filename=filename,
-                              verbose=True, n_jobs=8)
+    cptree = PrincipalParTree(max_depth=2,
+                              max_nbr_clusters=2,
+                              min_samples_leaf=3,
+                              min_samples_split=5,
+                              max_nbr_values=10,
+                              max_nbr_values_cat=2,
+                              bic_eps=0.0,
+                              random_state=42,
+                              n_components=1,
+                              oblique_splits=False,
+                              max_oblique_features=0,
+                              alfa_ind = 0,
+                              alfa_gro = 0,
+                              alfa_dem=1,
+                              protected_attribute=2,
+                              filename=filename,
+                              verbose=True,
+                              n_jobs=max(psutil.cpu_count(logical=False), 1))
     #cptree = VarianceParTree(2, 2, 3, 5, 100, 100, 0.0, 42, 1, False)
 
 #    class BinaryEncoder(TransformerMixin):
