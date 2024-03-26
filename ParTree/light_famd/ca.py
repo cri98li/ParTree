@@ -86,7 +86,7 @@ class CA(base.BaseEstimator, base.TransformerMixin):
 
     def _transform(self, X):
         """The row principal coordinates."""
-        if isinstance(X, pd.SparseDataFrame):
+        if isinstance(X, pd.DataFrame.sparse):
             X = X.to_coo()
         elif isinstance(X, pd.DataFrame):
             X = X.values
