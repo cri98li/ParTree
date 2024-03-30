@@ -4,6 +4,36 @@ from sklearn.metrics import rand_score, adjusted_rand_score, mutual_info_score, 
     adjusted_mutual_info_score, homogeneity_score, fowlkes_mallows_score, v_measure_score, completeness_score, \
     silhouette_score, calinski_harabasz_score, davies_bouldin_score
 
+def analyze_tree_rules(p_tree):
+    rules = p_tree.get_rules()
+    num_nodes = len(rules)
+    max_depth = 0
+    total_leaf_depth = 0
+    leaf_counts = 0
+    unique_attributes = set()
+    explanation_sizes = []
+
+    for rule in rules:
+        is_node = rule[0]
+        depth = rule[-1]
+
+        max_depth = max(max_depth, depth)
+
+        if is_node:
+            feat_list = rule[1]
+            unique_attributes.update(feat_list)
+        else:
+            leaf_counts += 1
+            total_leaf_depth += depth
+            explanation_sizes.append(len(unique_attributes))
+            unique_attributes = set()
+
+    average_depth = total_leaf_depth / leaf_counts if leaf_counts else 0
+    average_explanation_size = sum(explanation_sizes) / len(explanation_sizes) if explanation_sizes else 0
+
+    return num_nodes, max_depth, average_depth, average_explanation_size
+
+
 
 def get_metrics_s(clust_id, y):
     r_score = "%.4f" % rand_score(y, clust_id)

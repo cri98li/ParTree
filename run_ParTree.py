@@ -82,7 +82,7 @@ def run_CenterParTree(dataset: str, res_folder):
             colNames = hyperparams_name+["time", "silhouette", "calinski_harabasz", "davies_bouldin"]
             if has_y:
                 colNames += ["r_score", "adj_rand", "mut_info_score", "adj_mutual_info_score", "norm_mutual_info_score",
-                             "homog_score", "complete_score", "v_msr_score", "fwlks_mallows_score"]
+                             "homog_score", "complete_score", "v_msr_score", "fwlks_mallows_score", "num_nodes", "max_depth"]
 
             filename = "CenterParTree2-" \
                        + dataset.split("/")[-1].split("\\")[-1]+"-" \
@@ -190,7 +190,7 @@ def run_PrincipalParTree(dataset:str, res_folder):
         has_y = "_y.zip" in dataset
 
         df = pd.read_csv(dataset, index_col=None)
-        df = df.head(5000)
+        df = df.head(50)
         y = None
         # if the dataset is iris comment row below
         if has_y:
@@ -223,7 +223,7 @@ def run_PrincipalParTree(dataset:str, res_folder):
             [0, 1, 2],  # alfa_ind
             [0, 1, 2],  # alfa_dem
             [0, 1, 2],  # alfa_gro
-            [3]  # protected_attribute
+            [8]  # protected_attribute
         ]
 
         els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
@@ -231,7 +231,7 @@ def run_PrincipalParTree(dataset:str, res_folder):
             #try:
             els_bar.set_description("_".join([str(x) for x in els]) + ".csv")
             colNames = hyperparams_name + ["time", "silhouette", "calinski_harabasz", "davies_bouldin", "fairness_ind",
-                             "fairness_dem", "fairness_gro"]
+                             "fairness_dem", "fairness_gro", "num_nodes", "max_depth", "average_depth", "average_explanation_size"]
             if has_y:
                 colNames += ["r_score", "adj_rand", "mut_info_score", "adj_mutual_info_score",
                                  "norm_mutual_info_score",
@@ -269,6 +269,8 @@ def run_PrincipalParTree(dataset:str, res_folder):
             print("\n protected_attribute_name", protected_attribute_name)
             print("\n protected_attribute_index", protected_attribute_index)
 
+            print("NODES", cpt)
+
             ct = ColumnTransformer([
                 ('std_scaler', StandardScaler(), make_column_selector(dtype_include=['int64', 'float64'])),
                 ("cat", OrdinalEncoder(), make_column_selector(dtype_include="object"))],
@@ -293,7 +295,8 @@ def run_PrincipalParTree(dataset:str, res_folder):
             cpt.fit(X)
             stop = time.time()
 
-            row = list(els) + [stop - start] + measures.get_metrics_uns(X, cpt.labels_, protected_attribute_index)
+            row = list(els) + [stop - start] + measures.get_metrics_uns(X, cpt.labels_, protected_attribute_index) + list(measures.analyze_tree_rules(cpt))
+
             #print("X", X)
             #print("cpt.labels_", cpt.labels_)
             if has_y:
