@@ -398,7 +398,7 @@ def print_rules(rules, nbr_features, feature_names=None, precision=2, cat_precis
                 cond_s = "%s <= %s" % (feat_s, np.round(thr, precision))
                 #print("dentro thr", np.round(thr, precision))
             else:
-                cond_s = "%s = %s" % (feat_s, np.round(thr, cat_precision))
+                cond_s = "%s != %s" % (feat_s, np.round(thr, cat_precision))
                 if cat_precision == 0:
                     cond_s = cond_s.replace(".0", "")
             s = "%s|-+ if %s:" % (ident, cond_s)
