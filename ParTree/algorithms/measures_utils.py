@@ -1,11 +1,14 @@
 import numpy as np
-from ParTree.algorithms.fairness_definitions import _fairness_gro, _fairness_dem, _fairness_ind
+from sklearn.preprocessing import StandardScaler
+from ParTree.algorithms.fairness_definitions import _fairness_gro, _fairness_dem, _fairness_ind_f
 from sklearn.metrics import rand_score, adjusted_rand_score, mutual_info_score, normalized_mutual_info_score, \
     adjusted_mutual_info_score, homogeneity_score, fowlkes_mallows_score, v_measure_score, completeness_score, \
     silhouette_score, calinski_harabasz_score, davies_bouldin_score
 
 def analyze_tree_rules(p_tree):
     rules = p_tree.get_rules()
+    print("len rules", len(rules))
+
     num_nodes = len(rules)
     max_depth = 0
     total_leaf_depth = 0
@@ -14,6 +17,7 @@ def analyze_tree_rules(p_tree):
     explanation_sizes = []
 
     for rule in rules:
+        print("rule", rule)
         is_node = rule[0]
         depth = rule[-1]
 
@@ -61,7 +65,7 @@ def get_metrics_uns(X, clust_id, protected_attribute):
     calinski_harabasz = "%.4f" % calinski_harabasz_score(X, clust_id)
     davies_bouldin = "%.4f" % davies_bouldin_score(X, clust_id)
 
-    fairness_ind = _fairness_ind(len(X), X, clust_id)
+    fairness_ind = _fairness_ind_f(len(X), X, clust_id)
     fairness_dem = _fairness_dem(X, clust_id, cluster_indices, protected_attribute)
     fairness_gro = _fairness_gro(X, clust_id, protected_attribute)
 

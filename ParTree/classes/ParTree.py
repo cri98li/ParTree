@@ -332,6 +332,10 @@ class ParTree(ABC):
         return self._get_rules(idx, self.clf_dict_, 0)
 
     def _get_rules(self, idx_iter, clf_dict: ParTree_node, cur_depth):
+
+        if len(idx_iter) == 0:
+            return []
+
         rules = list()
 
         if clf_dict.is_leaf:
@@ -373,13 +377,13 @@ class ParTree(ABC):
             rules += self._get_rules(idx_all_r, clf_dict.node_r, cur_depth + 1)
             return rules
 
-
 def print_rules(rules, nbr_features, feature_names=None, precision=2, cat_precision=0):
     if feature_names is None:
         feature_names = ["X%s" % i for i in range(nbr_features)]
 
     s_rules = ""
     for rule in rules:
+        #print("rule", rule)
         is_rule = rule[0]
         depth = rule[-1]
         ident = "  " * depth

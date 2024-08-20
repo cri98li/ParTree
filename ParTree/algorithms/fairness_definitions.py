@@ -1,14 +1,37 @@
 import numpy as np
 from scipy.spatial import KDTree
 
+from scipy.spatial import KDTree
+import numpy as np
+from sklearn.metrics import pairwise_distances
 
-def _calculate_similarity_matrix(points):
-    tree = KDTree(points)
-    distances, _ = tree.query(points, k=2)
-    distance_matrix = tree.sparse_distance_matrix(tree, max_distance=np.inf).toarray()
-    np.fill_diagonal(distance_matrix, np.nan)
-    global_mean_distance = np.nanmean(distance_matrix)
+
+def _calculate_similarity_matrix(points, distances, indices):
+    # Compute the global mean distance using Euclidean distance
+    # distances = pairwise_distances(points)
+    # Initialize the adjacency matrix
     adjacency_matrix = np.zeros((len(points), len(points)), dtype=int)
+    print("before the for")
+    # Fill the adjacency matrix
+    for i in range(len(points)):
+        for idx in indices[i, 1:]:  # Exclude the point itself
+            adjacency_matrix[i, idx] = 1
+
+    return adjacency_matrix
+
+
+def _calculate_similarity_matrix_f(points):
+    # Compute the global mean distance using Euclidean distance
+    distances = pairwise_distances(points)
+    np.fill_diagonal(distances, np.inf)  # Ignore the distance to itself
+    global_mean_distance = np.mean(np.min(distances, axis=1))
+
+    # Create the KDTree
+    tree = KDTree(points)
+
+    # Compute the adjacency matrix
+    adjacency_matrix = np.zeros((len(points), len(points)), dtype=int)
+
     for i, point in enumerate(points):
         indices = tree.query_ball_point(point, global_mean_distance)
         for idx in indices:
@@ -18,10 +41,12 @@ def _calculate_similarity_matrix(points):
     return adjacency_matrix
 
 
-def _fairness_ind(n, points, labels):
+def _fairness_ind_f(n, points, labels):
     count_comp = 0
     penalties = 0
-    similarity_matrix = _calculate_similarity_matrix(points)
+    print("before similarity matrix in fairness_ind")
+    similarity_matrix = _calculate_similarity_matrix_f(points)
+    # print("dopo la similarity matrix")
     for i in range(n):
         cluster_indices = np.where(labels == labels[i])[0]
         similar_count = np.sum(similarity_matrix[i, cluster_indices]) - similarity_matrix[i, i]
@@ -30,7 +55,28 @@ def _fairness_ind(n, points, labels):
         penalties += penalty
 
     penalty = np.sum(penalties) / count_comp
+    print("fine ind")
     return penalty
+
+
+def _fairness_ind(n, points, labels, distances, indices):
+    count_comp = 0
+    penalties = 0
+    # print("dentro fairness ind, prima della similarity matrix")
+    print("before similarity matrix in fairness_ind")
+    similarity_matrix = _calculate_similarity_matrix(points, distances, indices)
+    # print("dopo la similarity matrix")
+    for i in range(n):
+        cluster_indices = np.where(labels == labels[i])[0]
+        # print("before similar count")
+        similar_count = np.sum(similarity_matrix[i, cluster_indices]) - similarity_matrix[i, i]
+        penalty = similar_count / len(cluster_indices)
+        count_comp += 1
+        penalties += penalty
+
+    penalty = np.sum(penalties) / count_comp
+    print("penalty già moltiplicata: ", penalty * 100)
+    return penalty * 100
 
 
 def _fairness_dem(points, labels, cluster_indices, protected_attribute):
@@ -58,6 +104,7 @@ def _fairness_dem(points, labels, cluster_indices, protected_attribute):
                 count_comp += 1
 
     penalty = np.sum(penalties) / count_comp
+    print("fine dem")
     return penalty
 
 
@@ -90,4 +137,5 @@ def _fairness_gro(points, labels, protected_attribute):
                 count_comp += 1
 
     penalty = np.sum(penalties) / len(np.unique(labels))
+    print("fine gro")
     return penalty

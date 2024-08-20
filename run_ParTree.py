@@ -6,6 +6,7 @@ import sys
 from time import sleep
 
 import numpy as np
+import csv
 import pandas as pd
 import pkg_resources
 import psutil as psutil
@@ -13,6 +14,7 @@ from sklearn.compose import ColumnTransformer, make_column_selector
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, OrdinalEncoder
 from tqdm.auto import tqdm
 
+from ParTree.classes.ParTree import print_rules
 from ParTree.classes.CenterParTree import CenterParTree
 from ParTree.classes.ImpurityParTree import ImpurityParTree
 import ParTree.algorithms.measures_utils as measures
@@ -25,6 +27,8 @@ def run(datasets: list, destination_folder: str):
         #("CenterParTree2", run_CenterParTree),
         #("ImpurityParTree2", run_ImpurityParTree),
     ]
+
+    print("dentro fairpartree")
 
     datasets_bar = tqdm(datasets, position=0, leave=False)
     for dataset in datasets_bar:
@@ -55,7 +59,7 @@ def run_CenterParTree(dataset: str, res_folder):
         [1],
         #[len(np.unique(y))] if has_y else range(2, 12 + 1, 2),  # max_nbr_clusters
         #range(2, 12 + 1, 2),  # max_nbr_clusters
-        [2],
+        [4, 6, 8, 10, 12, 14, 16, 18, 20],
         #[3, 30],  # range(1, 100, 30),  # min_samples_leaf
         [3],
         #[5, 50],  # range(2, 100, 30),  # min_samples_split
@@ -184,13 +188,19 @@ def run_ImpurityParTree(dataset: str, res_folder):
 
 
 def run_PrincipalParTree(dataset:str, res_folder):
-    with warnings.catch_warnings():
+    #print("dentro ppt")
+    print("dataset", dataset)
+    with (warnings.catch_warnings()):
         warnings.simplefilter("ignore")
 
         has_y = "_y.zip" in dataset
 
-        df = pd.read_csv(dataset, index_col=None)
-        df = df.head(50)
+        #df = pd.read_csv(dataset, index_col=None)
+        #print("pre df")
+        df = pd.read_csv(dataset)
+        #df = df.head(100)
+        #print("df", df)
+        #df = df.head(50)
         y = None
         # if the dataset is iris comment row below
         if has_y:
@@ -202,32 +212,34 @@ def run_PrincipalParTree(dataset:str, res_folder):
                             "max_oblique_features", "alfa_ind", "alfa_gro", "alfa_dem", "protected_attribute"]
 
         parameters = [
-            #[2, 3, 4, 6, 8],  # max_depth
-            [2],  # max_depth
-            range(2, 12 + 1, 2),  # max_nbr_clusters
-            #[2]  # max_nbr_clusters
-            #[3, 30],  # range(1, 100, 30),  # min_samples_leaf
-            [3],  # range(1, 100, 30),  # min_samples_leaf
-            [5],  # range(2, 100, 30),  # min_samples_split
-            #[5, 50],  # range(2, 100, 30),  # min_samples_split
+            [20],  # max_depth
+            #[2],  # max_depth
+            [20],  # max_nbr_clusters
+            #[2],  # max_nbr_clusters
+            [1],  # range(1, 100, 30),  # min_samples_leaf
+            #[3],  # range(1, 100, 30),  # min_samples_leaf
+            #[5],  # range(2, 100, 30),  # min_samples_split
+            [2],  # range(2, 100, 30),  # min_samples_split
             #[np.inf, 1000, 100],  # max_nbr_values
             [100],
             #[100, 20],  # max_nbr_values_cat
             [100],
             #np.arange(.0, .3, .1),  # bic_eps
-            [0.0],
+            [0.01],
             [42],  # random_state
             [1],  # n_components
             [False],  # oblique_splits
-            [0, 1],  # max_oblique_features
-            [0, 1, 2],  # alfa_ind
-            [0, 1, 2],  # alfa_dem
-            [0, 1, 2],  # alfa_gro
-            [8]  # protected_attribute
+            [0],  # max_oblique_features
+            [0],  # alfa_ind
+            [1],  # alfa_gro
+            [0],  # alfa_dem
+            [3]  # protected_attribute
         ]
 
         els_bar = tqdm(list(itertools.product(*parameters)), position=2, leave=False)
+        #print("prima di els")
         for els in els_bar:
+            #print("dentro els")
             #try:
             els_bar.set_description("_".join([str(x) for x in els]) + ".csv")
             colNames = hyperparams_name + ["time", "silhouette", "calinski_harabasz", "davies_bouldin", "fairness_ind",
@@ -237,9 +249,10 @@ def run_PrincipalParTree(dataset:str, res_folder):
                                  "norm_mutual_info_score",
                                  "homog_score", "complete_score", "v_msr_score", "fwlks_mallows_score"]
 
-            filename = "PrincipalParTree-" \
+            filename = "2008_gro_3_PrincipalParTree-" \
                            + dataset.split("/")[-1].split("\\")[-1] + "-" \
                            + ("_".join([str(x) for x in els]) + ".csv")
+            #print("after els")
 
             if os.path.exists(res_folder + filename):
                 continue
@@ -261,8 +274,11 @@ def run_PrincipalParTree(dataset:str, res_folder):
                 alfa_gro=els[12],
                 alfa_dem=els[13],
                 protected_attribute=els[14],
-                n_jobs=psutil.cpu_count(logical=False)
+                n_jobs=psutil.cpu_count(logical=False),
+                filename = filename
             )
+
+            print("before protected attribute")
 
             protected_attribute_index = cpt.protected_attribute
             protected_attribute_name = df.columns[protected_attribute_index]
@@ -294,19 +310,42 @@ def run_PrincipalParTree(dataset:str, res_folder):
             start = time.time()
             cpt.fit(X)
             stop = time.time()
-
+            K = len(set(cpt.labels_))
+            print(list(cpt.labels_))
+            with open(os.path.join(res_folder, filename.replace('.csv', '_labels.txt')), 'w') as file:
+                file.write("[")
+                file.write(", ".join(map(str, cpt.labels_)))
+                file.write("]")
             row = list(els) + [stop - start] + measures.get_metrics_uns(X, cpt.labels_, protected_attribute_index) + list(measures.analyze_tree_rules(cpt))
 
-            #print("X", X)
+
+
+            print("K is", K)
             #print("cpt.labels_", cpt.labels_)
             if has_y:
                 row += measures.get_metrics_s(cpt.labels_, y)
+
+            print(print_rules(cpt.get_rules(), X.shape[1]))
+            print("Current Working Directory:", os.getcwd())
+
+            with open('7_genfair_rules_.txt', 'w') as file:
+                # Redirect the print output to the file.
+                print(print_rules(cpt.get_rules(), X.shape[1]), file=file)
 
             print("row", row)
 
             print("colNames", colNames)
 
-            pd.DataFrame([row], columns=colNames).to_csv(res_folder + filename, index=False)
+            #with open(res_folder + filename, mode='w', newline='', encoding='utf-8') as file:
+            #    writer = csv.writer(file)
+            #    print("COL NAMES OF THE CSV", colNames)
+            #    writer.writerow(colNames)
+            #    print("")
+            #    writer.writerow(row)
+
+            final_df = pd.DataFrame([row], columns=colNames)
+            print("final_DF", final_df)
+            final_df.to_csv(res_folder + filename, index=False)
             #except Exception as e:
                 #print(f"Errore dataset {dataset}, parametri {'_'.join([str(x) for x in els]) + '.csv'}")
 
@@ -321,5 +360,5 @@ def get_version():
 
 
 if __name__ == '__main__':
-    run(['Experiments/datasets/real/german_credit_y.zip'], 'Experiments/prova/' )
+    run(['Experiments/datasets/real/compas-scores-two-years_y.zip'], 'Experiments/final_results/' )
 
