@@ -5,7 +5,9 @@ from concurrent.futures import ProcessPoolExecutor
 from itertools import count
 from typing import Union
 
+import graphviz
 import numpy as np
+import pandas as pd
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 from ParTree.algorithms.bic_estimator import bic
@@ -201,20 +203,20 @@ class ParTree(ABC):
     def _predict(self, X, idx, clf_dict):
         idx_iter = idx
 
-        if clf_dict["clf"] is None:
-            return np.array([clf_dict["label"]] * len(idx_iter))
+        if clf_dict.clf is None:
+            return np.array([clf_dict.label] * len(idx_iter))
 
         else:
 
-            clf = clf_dict["clf"]
+            clf = clf_dict.clf
             labels = clf.apply(X[idx_iter])
 
             idx_l, idx_r = np.where(labels == 1)[0], np.where(labels == 2)[0]
             idx_all_l = idx_iter[idx_l]
             idx_all_r = idx_iter[idx_r]
 
-            labels_l = self._predict(X, idx_all_l, clf_dict["node_l"])
-            labels_r = self._predict(X, idx_all_r, clf_dict["node_r"])
+            labels_l = self._predict(X, idx_all_l, clf_dict.node_l)
+            labels_r = self._predict(X, idx_all_r, clf_dict.node_r)
 
             labels[idx_l] = labels_l
             labels[idx_r] = labels_r
@@ -367,3 +369,63 @@ def print_rules(rules, nbr_features, feature_names=None, precision=2, cat_precis
         s_rules += "%s\n" % s
 
     return s_rules
+
+def export_visualization(partree:ParTree, feature_names=None, precision=2, scaler=None):
+    return _export_visualization(partree, partree.clf_dict_, feature_names, precision, scaler)
+
+def _export_visualization(partree:ParTree, node:ParTree_node, feature_names=None, precision=2, scaler=None, graph=None):
+    if graph is None:
+        graph = graphviz.Digraph(name='ParTree', graph_attr={
+            #'splines': 'ortho',
+            #'nodesep': '1.0',
+        })
+
+    if node.is_leaf:
+        label = str(partree.label_encoder_.transform([node.label])[0])
+        graph.node(str(node.idx), **{
+            'label': label,
+            'shape': 'circle',
+            'fillcolor': '#FFD02F',
+            'color': '#FFD02F',
+            'style': 'filled',
+        })
+    else:
+        feat_idx = node.clf.tree_.feature[0]
+        thr = node.clf.tree_.threshold[0]
+        cat = feat_idx in partree.cat_indexes
+
+        if scaler is not None:
+            tmp = np.zeros((1, len(scaler.get_feature_names_out())))
+            tmp[0, feat_idx] = thr
+            thr = scaler.inverse_transform(tmp)[0, feat_idx]
+
+        graph.node(str(node.idx), **{
+            'label': str(feat_idx) if feature_names is None else feature_names[feat_idx],
+            'shape': 'box',
+            'fillcolor': '#CEE741',
+            'color': '#CEE741',
+            'style': 'filled',
+        })
+
+        _export_visualization(partree, node.node_l, feature_names, precision, scaler, graph)
+        _export_visualization(partree, node.node_r, feature_names, precision, scaler, graph)
+
+        graph.edge(str(node.idx), str(node.node_l.idx), **{
+            'label': f"\u2264 {round(thr, precision)}" if cat else f'!= {thr}',
+            'fontsize': '10',
+        })
+
+        graph.edge(str(node.idx), str(node.node_r.idx), **{
+            'label': f"> {round(thr, precision)}" if cat else f'\u2260 {thr}',
+            'fontsize': '10',
+        })
+
+    return graph
+
+def export_centroids(partree:ParTree, X:np.ndarray, feature_names, scaler=None):
+    X = np.copy(X)
+    labels = partree.predict(X if scaler is None else scaler.transform(X))
+
+    df = pd.DataFrame(X, columns=feature_names)
+    df['labels'] = labels
+    return df.groupby(["labels"]).agg(['mean', 'std'])
