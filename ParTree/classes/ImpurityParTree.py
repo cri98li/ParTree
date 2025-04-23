@@ -2,8 +2,8 @@ import numpy as np
 from sklearn.metrics import mean_absolute_percentage_error, r2_score
 from tqdm.auto import tqdm
 
+from ParTree import DecisionSplit
 from ParTree.algorithms.bic_estimator import bic
-from ParTree.algorithms.data_splitter import DecisionSplit
 from ParTree.classes.ParTree import ParTree
 
 

@@ -8,6 +8,7 @@ from typing import Union
 import graphviz
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 from ParTree.algorithms.bic_estimator import bic
@@ -370,6 +371,48 @@ def print_rules(rules, nbr_features, feature_names=None, precision=2, cat_precis
 
     return s_rules
 
+def rules_for_greenDATai(pt:ParTree, col_names, precision=2):
+    res = _rules_for_greenDATai(pt.clf_dict_, col_names, pt.cat_indexes, precision)
+
+    #fix rules syntax
+    res_fixed = []
+
+    for row in res:
+        row_splitted = row.split("=>")
+        res_fixed.append(
+            row_splitted[0][:-4] + ' => ' + row_splitted[1]
+        )
+
+    return sorted(res_fixed, key=lambda x: int(x.split(' ')[-1]))
+
+
+def _rules_for_greenDATai(pt:ParTree_node, col_names, cat_indexes, precision=2):
+    if pt.is_leaf:
+        return [f'=> {pt.label}']
+    else:
+        if isinstance(pt.clf, DecisionSplit):
+            feat = pt.clf.feature
+            thr = pt.clf.threshold
+            cat = pt.clf.categorical
+        else:
+            if not pt.is_oblique:
+                feat = pt.clf.tree_.feature[0]
+                thr = pt.clf.tree_.threshold[0]
+                cat = feat in cat_indexes
+            else:
+                raise Exception("Oblique splits not supported for greenDATai")
+
+        comp, n_comp = '<=', '>'
+        if cat:
+            comp, n_comp = '=', '!='
+        res_l = _rules_for_greenDATai(pt.node_l, col_names, cat_indexes)
+        res_r = _rules_for_greenDATai(pt.node_r, col_names, cat_indexes)
+        rounded_thr = round(thr, precision) if not cat else thr
+
+        return ([f'{col_names[feat]} {comp} {rounded_thr} AND {x}' for x in res_l] +
+                [f'{col_names[feat]} {n_comp} {rounded_thr} AND {x}' for x in res_r])
+
+
 def export_visualization(partree:ParTree, feature_names=None, precision=2, scaler=None):
     return _export_visualization(partree, partree.clf_dict_, feature_names, precision, scaler)
 
@@ -390,9 +433,14 @@ def _export_visualization(partree:ParTree, node:ParTree_node, feature_names=None
             'style': 'filled',
         })
     else:
-        feat_idx = node.clf.tree_.feature[0]
-        thr = node.clf.tree_.threshold[0]
-        cat = feat_idx in partree.cat_indexes
+        if type(node.clf) is DecisionSplit:
+            feat_idx = node.clf.feature
+            thr = node.clf.threshold
+            cat = node.clf.categorical
+        else:
+            feat_idx = node.clf.tree_.feature[0]
+            thr = node.clf.tree_.threshold[0]
+            cat = feat_idx in partree.cat_indexes
 
         if scaler is not None:
             tmp = np.zeros((1, len(scaler.get_feature_names_out())))
@@ -411,12 +459,12 @@ def _export_visualization(partree:ParTree, node:ParTree_node, feature_names=None
         _export_visualization(partree, node.node_r, feature_names, precision, scaler, graph)
 
         graph.edge(str(node.idx), str(node.node_l.idx), **{
-            'label': f"\u2264 {round(thr, precision)}" if cat else f'!= {thr}',
+            'label': f"\u2264 {round(thr, precision)}" if not cat else f'= {thr}',
             'fontsize': '10',
         })
 
         graph.edge(str(node.idx), str(node.node_r.idx), **{
-            'label': f"> {round(thr, precision)}" if cat else f'\u2260 {thr}',
+            'label': f"> {round(thr, precision)}" if not cat else f'\u2260 {thr}',
             'fontsize': '10',
         })
 
@@ -429,3 +477,26 @@ def export_centroids(partree:ParTree, X:np.ndarray, feature_names, scaler=None):
     df = pd.DataFrame(X, columns=feature_names)
     df['labels'] = labels
     return df.groupby(["labels"]).agg(['mean', 'std'])
+
+
+def export_centroids_svg(df, labels, filename="partree_table.svg"):
+    rows = []
+
+    for c in np.unique(labels):
+        cluster_data = df.values[labels == c]
+        avg = cluster_data.mean(axis=0)
+        std = cluster_data.std(axis=0)
+        row_str = [f"{m:.2f} ± ({s:.2f})" for m, s in zip(avg, std)]
+        rows.append(row_str)
+
+    df = pd.DataFrame(rows,
+                      columns=df.columns,
+                      index=[f'Cluster {i}' for i in np.unique(labels)])
+    fig, ax = plt.subplots(figsize=(df.shape[1] * 5, df.shape[0] * 0.6 + 1))
+    ax.axis('off')
+
+    ax.table(cellText=df.values, rowLabels=df.index, colLabels=df.columns, cellLoc='center', loc='center',
+             bbox=[0, 0, 1, 1])
+    fig.tight_layout()
+    plt.savefig(filename, dpi=300)
+    plt.close()
